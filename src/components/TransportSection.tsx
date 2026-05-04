@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Bus, Car, MapPin, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import transportImg from "@/assets/tuba-transport.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -100,13 +101,13 @@ const TransportSection = () => {
               ))}
             </div>
 
-            <a
-              href="#contact"
+            <Link
+              to="/transport"
               className="inline-flex items-center gap-2 bg-gradient-sunset text-white font-semibold px-7 py-3.5 rounded-full shadow-gold hover:shadow-glow transition-all hover:scale-105"
             >
-              {isBn ? "ট্রান্সপোর্ট বুক করুন" : "Book Transport"}
+              {isBn ? "বিস্তারিত দেখুন" : "View Details"}
               <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>

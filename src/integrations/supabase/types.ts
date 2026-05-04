@@ -2423,6 +2423,86 @@ export type Database = {
         }
         Relationships: []
       }
+      transport_orders: {
+        Row: {
+          created_at: string
+          currency: string
+          dropoff_address: string | null
+          guest_email: string | null
+          guest_name: string
+          guest_phone: string
+          id: string
+          notes: string | null
+          passengers: number
+          pickup_address: string | null
+          pickup_date: string | null
+          pickup_time: string | null
+          route_from: string | null
+          route_to: string | null
+          service_id: string | null
+          status: string
+          total_price: number
+          tracking_id: string
+          updated_at: string
+          user_id: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          dropoff_address?: string | null
+          guest_email?: string | null
+          guest_name: string
+          guest_phone: string
+          id?: string
+          notes?: string | null
+          passengers?: number
+          pickup_address?: string | null
+          pickup_date?: string | null
+          pickup_time?: string | null
+          route_from?: string | null
+          route_to?: string | null
+          service_id?: string | null
+          status?: string
+          total_price?: number
+          tracking_id?: string
+          updated_at?: string
+          user_id?: string | null
+          vehicle_type: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          dropoff_address?: string | null
+          guest_email?: string | null
+          guest_name?: string
+          guest_phone?: string
+          id?: string
+          notes?: string | null
+          passengers?: number
+          pickup_address?: string | null
+          pickup_date?: string | null
+          pickup_time?: string | null
+          route_from?: string | null
+          route_to?: string | null
+          service_id?: string | null
+          status?: string
+          total_price?: number
+          tracking_id?: string
+          updated_at?: string
+          user_id?: string | null
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "transport_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_services: {
         Row: {
           capacity: number
