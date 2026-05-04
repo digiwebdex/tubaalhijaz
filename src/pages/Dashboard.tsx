@@ -145,7 +145,7 @@ const Dashboard = () => {
   const getCompanyInfo = async (): Promise<CompanyInfo> => {
     const { data: cms } = await supabase.from("site_content" as any).select("content").eq("section_key", "contact").maybeSingle();
     const c = (cms as any)?.content || {};
-    return { name: "TRIP TASTIC", phone: c.phone || "", email: c.email || "", address: c.location || "" };
+    return { name: "TUBA ALHIJAZ", phone: c.phone || "", email: c.email || "", address: c.location || "" };
   };
 
   const handleDownloadInvoice = async (b: any) => {
@@ -237,7 +237,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 flex items-center justify-between h-16">
           <a href="/" className="flex items-center gap-2">
             <img src={logo} alt="Logo" className="h-10 w-10 rounded-md object-cover" />
-            <span className="font-heading text-lg font-bold text-primary hidden sm:block">TRIP TASTIC</span>
+            <span className="font-heading text-lg font-bold text-primary hidden sm:block">TUBA ALHIJAZ</span>
           </a>
           <div className="flex items-center gap-4">
             <Link to="/track" className="text-muted-foreground hover:text-primary transition-colors" title="Track Booking">

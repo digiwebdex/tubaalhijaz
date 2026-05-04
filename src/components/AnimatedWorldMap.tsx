@@ -103,7 +103,7 @@ const AnimatedWorldMap = () => {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
         </span>
-        TRIP TASTIC • {DESTINATIONS.length} {language === "bn" ? "একটিভ রুট" : "ACTIVE ROUTES"}
+        TUBA ALHIJAZ • {DESTINATIONS.length} {language === "bn" ? "একটিভ রুট" : "ACTIVE ROUTES"}
       </motion.div>
 
       {/* Decorative corner brackets */}

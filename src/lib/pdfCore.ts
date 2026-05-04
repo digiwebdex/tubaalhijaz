@@ -1,5 +1,5 @@
 /**
- * pdfCore.ts — Unified PDF Design System for TRIP TASTIC
+ * pdfCore.ts — Unified PDF Design System for TUBA ALHIJAZ
  * 
  * Clean, professional A4 design matching the company invoice template.
  * Large logo header, clean typography, dark footer bar with contact info.
@@ -271,7 +271,7 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     doc.text("Thank You", pw - MARGIN - 4, barY + 10, { align: "right" });
     doc.setFontSize(6.5);
     doc.setFont("helvetica", "bold");
-    doc.text("Stay With TRIP TASTIC", pw - MARGIN - 4, barY + 17, { align: "right" });
+    doc.text("Stay With TUBA ALHIJAZ", pw - MARGIN - 4, barY + 17, { align: "right" });
 
 
     // Page numbers
@@ -338,7 +338,7 @@ export function addSignatureBlock(doc: jsPDF, sig: SignatureData, y: number): nu
     doc.setFont("helvetica", "bold");
     doc.text(sig.authorized_name, rightCenter, lineY + 5, { align: "center" });
   } else {
-    doc.text("TRIP TASTIC", rightCenter, lineY + 5, { align: "center" });
+    doc.text("TUBA ALHIJAZ", rightCenter, lineY + 5, { align: "center" });
   }
 
   if (sig.designation) {

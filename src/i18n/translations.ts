@@ -122,7 +122,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "about.label": "Why Choose Us",
     "about.heading": "Built on",
     "about.headingHighlight": "Trust & Experience",
-    "about.description": "TRIP TASTIC is your one-stop travel partner for Hajj, Umrah, international tours, air tickets, visa processing and air ambulance support. We combine local expertise with global reach to deliver seamless journeys for thousands of travellers.",
+    "about.description": "TUBA ALHIJAZ is your one-stop travel partner for Hajj, Umrah, international tours, air tickets, visa processing and air ambulance support. We combine local expertise with global reach to deliver seamless journeys for thousands of travellers.",
     "about.reason1.title": "Licensed & Approved",
     "about.reason1.desc": "Fully licensed travel agency with all official approvals",
     "about.reason2.title": "Personalised Service",
@@ -437,7 +437,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "verify.totalAmount": "Total Amount",
     "verify.paidAmount": "Paid Amount",
     "verify.dueAmount": "Due Amount",
-    "verify.companyFooter": "TRIP TASTIC — Hajj & Umrah Services",
+    "verify.companyFooter": "TUBA ALHIJAZ — Hajj & Umrah Services",
 
     // Invoice Page
     "invoice.searchPlaceholder": "Enter Tracking ID (e.g. TT-XXXXXXXX)",
@@ -511,7 +511,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // WhatsApp
     "whatsapp.button": "How can we help you?",
-    "whatsapp.message": "Assalamu Alaikum! Welcome to TRIP TASTIC. How can we help?",
+    "whatsapp.message": "Assalamu Alaikum! Welcome to TUBA ALHIJAZ. How can we help?",
 
     // Contact extras
     "contact.location.default": "4th Floor, Jail Road, Munshipara\nDinajpur Sadar - 5200",
@@ -642,7 +642,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "about.label": "কেন আমাদের বেছে নেবেন",
     "about.heading": "তৈরি হয়েছে",
     "about.headingHighlight": "বিশ্বাস ও অভিজ্ঞতায়",
-    "about.description": "TRIP TASTIC আপনার সম্পূর্ণ ট্রাভেল পার্টনার — হজ্জ, উমরাহ, ইন্টারন্যাশনাল ট্যুর, এয়ার টিকিট, ভিসা প্রসেসিং ও এয়ার অ্যাম্বুলেন্স সাপোর্ট। স্থানীয় অভিজ্ঞতা ও গ্লোবাল রিচ মিলিয়ে হাজারো ট্রাভেলারের জন্য সহজ যাত্রা নিশ্চিত করি।",
+    "about.description": "TUBA ALHIJAZ আপনার সম্পূর্ণ ট্রাভেল পার্টনার — হজ্জ, উমরাহ, ইন্টারন্যাশনাল ট্যুর, এয়ার টিকিট, ভিসা প্রসেসিং ও এয়ার অ্যাম্বুলেন্স সাপোর্ট। স্থানীয় অভিজ্ঞতা ও গ্লোবাল রিচ মিলিয়ে হাজারো ট্রাভেলারের জন্য সহজ যাত্রা নিশ্চিত করি।",
     "about.reason1.title": "লাইসেন্সপ্রাপ্ত ও অনুমোদিত",
     "about.reason1.desc": "সকল সরকারি অনুমোদন সহ সম্পূর্ণ লাইসেন্সপ্রাপ্ত ট্রাভেল এজেন্সি",
     "about.reason2.title": "পার্সোনালাইজড সার্ভিস",
@@ -957,7 +957,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "verify.totalAmount": "মোট পরিমাণ",
     "verify.paidAmount": "পরিশোধিত পরিমাণ",
     "verify.dueAmount": "বকেয়া পরিমাণ",
-    "verify.companyFooter": "ট্রিপ টেস্টিক — হজ ও উমরাহ সেবা",
+    "verify.companyFooter": "তুবা আলহিজাজ — হজ ও উমরাহ সেবা",
 
     // Invoice Page
     "invoice.searchPlaceholder": "ট্র্যাকিং আইডি লিখুন (যেমন TT-XXXXXXXX)",
@@ -1033,7 +1033,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // WhatsApp
     "whatsapp.button": "আপনাকে কিভাবে সহযোগিতা করতে পারি",
-    "whatsapp.message": "আসসালামু আলাইকুম! TRIP TASTIC এ স্বাগতম। কিভাবে সাহায্য করতে পারি?",
+    "whatsapp.message": "আসসালামু আলাইকুম! TUBA ALHIJAZ এ স্বাগতম। কিভাবে সাহায্য করতে পারি?",
 
     // Contact extras
     "contact.location.default": "৪র্থ তলা, জেল রোড, মুন্সিপাড়া\nদিনাজপুর সদর - ৫২০০",

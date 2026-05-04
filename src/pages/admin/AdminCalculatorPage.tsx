@@ -82,7 +82,7 @@ export default function AdminCalculatorPage() {
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100);
-      doc.text("TRIP TASTIC", margin + 22, y + 13);
+      doc.text("TUBA ALHIJAZ", margin + 22, y + 13);
       doc.text(`Generated: ${new Date().toLocaleDateString("en-GB")}`, pageWidth - margin, y + 7, { align: "right" });
       doc.setTextColor(0);
 
@@ -234,7 +234,7 @@ export default function AdminCalculatorPage() {
       doc.setFontSize(7);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(140);
-      doc.text("This is an estimate only. Actual costs may vary. | TRIP TASTIC", pageWidth / 2, footerY, { align: "center" });
+      doc.text("This is an estimate only. Actual costs may vary. | TUBA ALHIJAZ", pageWidth / 2, footerY, { align: "center" });
 
       const safeName = (groupName || "Calculator").replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "-") || "Calculator";
       doc.save(`${safeName}-Cost-Report.pdf`);

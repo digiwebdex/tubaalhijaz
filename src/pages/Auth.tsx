@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth as api, supabase } from "@/lib/api";
 import { toast } from "sonner";
-import logo from "@/assets/triptastic-logo.png";
+import logo from "@/assets/tuba-logo.png";
 import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle, Smartphone } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";
@@ -162,9 +162,9 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <a href="/" className="inline-flex items-center gap-3 mb-4">
-            <img src={logo} alt="Trip Tastic Logo" className="h-14 w-14 rounded-md object-contain bg-white p-1 border border-border shadow-sm" />
+            <img src={logo} alt="TUBA ALHIJAZ Logo" className="h-14 w-14 rounded-md object-contain bg-white p-1 border border-border shadow-sm" />
             <div className="text-left">
-              <span className="font-heading text-xl font-bold text-primary">TRIP TASTIC</span>
+              <span className="font-heading text-xl font-bold text-primary">TUBA ALHIJAZ</span>
               <span className="block text-xs tracking-[0.25em] text-muted-foreground uppercase">Travel Hub</span>
             </div>
           </a>

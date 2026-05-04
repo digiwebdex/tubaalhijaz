@@ -214,7 +214,7 @@ const AdminGuidePage = () => {
       pdf.setFontSize(26).setFont("helvetica", "bold");
       pdf.text("Admin User Guide", pageW / 2, 30, { align: "center" });
       pdf.setFontSize(13).setFont("helvetica", "normal");
-      pdf.text("Trip Tastic — Travel Management ERP", pageW / 2, 42, { align: "center" });
+      pdf.text("TUBA ALHIJAZ — Travel Management ERP", pageW / 2, 42, { align: "center" });
       pdf.setFontSize(9);
       pdf.text(`Generated: ${new Date().toLocaleDateString("en-GB")}`, pageW / 2, 50, { align: "center" });
 
@@ -238,7 +238,7 @@ const AdminGuidePage = () => {
         pdf.rect(0, 0, pageW, 14, "F");
         pdf.setTextColor(255, 255, 255).setFontSize(10).setFont("helvetica", "bold");
         pdf.text(`Section ${idx + 1}`, 15, 9);
-        pdf.text("Trip Tastic Admin Guide", pageW - 15, 9, { align: "right" });
+        pdf.text("TUBA ALHIJAZ Admin Guide", pageW - 15, 9, { align: "right" });
 
         pdf.setTextColor(15, 23, 42);
         pdf.setFontSize(18).setFont("helvetica", "bold");
@@ -305,7 +305,7 @@ const AdminGuidePage = () => {
             <BookOpen className="h-7 w-7 text-primary" /> Admin User Guide
           </h1>
           <p className="text-muted-foreground mt-1">
-            Trip Tastic ERP — সম্পূর্ণ admin manual। প্রতিটা module কীভাবে use করবেন step-by-step।
+            TUBA ALHIJAZ ERP — সম্পূর্ণ admin manual। প্রতিটা module কীভাবে use করবেন step-by-step।
           </p>
         </div>
         <Button onClick={downloadPdf} disabled={generating} size="lg">

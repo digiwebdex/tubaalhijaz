@@ -1,7 +1,7 @@
 /**
  * pdfDocuments.ts — PDF Document Types (Receipts, Vouchers, Statements, Cashbook, Reports)
  * 
- * Clean A4 design matching the TRIP TASTIC invoice template.
+ * Clean A4 design matching the TUBA ALHIJAZ invoice template.
  */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";

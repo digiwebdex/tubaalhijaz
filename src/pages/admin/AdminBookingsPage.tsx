@@ -430,7 +430,7 @@ export default function AdminBookingsPage() {
       guest_address: b.guest_address || "",
       guest_passport: b.guest_passport || "",
       user_id: b.user_id || null,
-      moallem_id: b.moallem_id || (moallems.find((m: any) => m.name === "TRIP TASTIC")?.id || ""),
+      moallem_id: b.moallem_id || (moallems.find((m: any) => m.name === "TUBA ALHIJAZ")?.id || ""),
       booking_type: normalizedType,
     });
 
@@ -673,12 +673,12 @@ export default function AdminBookingsPage() {
         };
         const newLabel = statusLabels[statusChangeVal] || statusChangeVal;
         const pkgName = booking.packages?.name || "your package";
-        const smsMsg = `TRIP TASTIC: Dear ${booking.guest_name || "Customer"}, your booking (${booking.tracking_id}) status has been updated to "${newLabel}". Package: ${pkgName}. For queries: 01711-999910`;
+        const smsMsg = `TUBA ALHIJAZ: Dear ${booking.guest_name || "Customer"}, your booking (${booking.tracking_id}) status has been updated to "${newLabel}". Package: ${pkgName}. For queries: 01711-999910`;
         const emailSubject = `Booking Status Updated — ${booking.tracking_id}`;
         const emailHtml = `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
             <div style="background:#C5A55A;padding:15px;text-align:center;border-radius:8px 8px 0 0;">
-              <h2 style="color:#fff;margin:0;">TRIP TASTIC</h2>
+              <h2 style="color:#fff;margin:0;">TUBA ALHIJAZ</h2>
             </div>
             <div style="border:1px solid #e5e5e5;border-top:0;padding:20px;border-radius:0 0 8px 8px;">
               <p>Dear <strong>${booking.guest_name || "Customer"}</strong>,</p>
@@ -690,7 +690,7 @@ export default function AdminBookingsPage() {
                 <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">New Status</td><td style="padding:8px;border:1px solid #eee;color:#C5A55A;font-weight:bold;">${newLabel}</td></tr>
               </table>
               <p>For any queries, contact us at <strong>01711-999910</strong></p>
-              <p style="color:#888;font-size:12px;margin-top:20px;">Thank you for choosing TRIP TASTIC.</p>
+              <p style="color:#888;font-size:12px;margin-top:20px;">Thank you for choosing TUBA ALHIJAZ.</p>
             </div>
           </div>`;
 

@@ -22,12 +22,12 @@ export default function InvoicePage() {
   const printRef = useRef<HTMLDivElement>(null);
 
   const company: CompanyInfo = {
-    name: "TRIP TASTIC",
+    name: "TUBA ALHIJAZ",
     phone: "+880 1711-925400",
     email: "info@triptastic.com.bd",
-    address: "Corporate Office: TRIP TASTIC, 4th Floor, Jail Road, Munshipara, Dinajpur Sadar - 5200",
+    address: "Corporate Office: TUBA ALHIJAZ, 4th Floor, Jail Road, Munshipara, Dinajpur Sadar - 5200",
   };
-  const companyAddressBn = "কর্পোরেট অফিস: ট্রিপ টেস্টিক, ৪র্থ তলা, জেল রোড, মুন্সিপাড়া, দিনাজপুর সদর - ৫২০০";
+  const companyAddressBn = "কর্পোরেট অফিস: তুবা আলহিজাজ, ৪র্থ তলা, জেল রোড, মুন্সিপাড়া, দিনাজপুর সদর - ৫২০০";
 
   const search = async () => {
     if (!trackingId.trim()) return;

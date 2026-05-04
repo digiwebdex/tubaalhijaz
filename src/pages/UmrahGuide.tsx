@@ -11,8 +11,8 @@ const UmrahGuide = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         canonicalUrl="/umrah-guide"
-        description="Complete Umrah guideline — step-by-step rituals, requirements and travel tips from TRIP TASTIC."
-        keywords="Umrah guide, Umrah guideline, how to perform Umrah, TRIP TASTIC Umrah"
+        description="Complete Umrah guideline — step-by-step rituals, requirements and travel tips from TUBA ALHIJAZ."
+        keywords="Umrah guide, Umrah guideline, how to perform Umrah, TUBA ALHIJAZ Umrah"
       />
       <Navbar />
 

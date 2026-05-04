@@ -12,9 +12,9 @@ interface SEOHeadProps {
   lang?: string;
 }
 
-const SITE_NAME = "TRIP TASTIC";
+const SITE_NAME = "TUBA ALHIJAZ";
 const DEFAULT_DESCRIPTION =
-  "TRIP TASTIC — Premium Hajj, Umrah, international tours, air tickets, visa processing & air ambulance support. Trusted travel partner from Bangladesh.";
+  "TUBA ALHIJAZ — Premium Hajj, Umrah, international tours, air tickets, visa processing & air ambulance support. Trusted travel partner from Bangladesh.";
 const DEFAULT_OG_IMAGE = "/og-image.jpg";
 const BASE_URL = "https://triptastic.com.bd";
 

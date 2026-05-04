@@ -54,7 +54,7 @@ export async function getSignatureData(): Promise<SignatureData> {
   }
 
   cachedSignature = {
-    authorized_name: val.authorized_name || "TRIP TASTIC",
+    authorized_name: val.authorized_name || "TUBA ALHIJAZ",
     designation: val.designation || "",
     signature_base64,
     stamp_base64,

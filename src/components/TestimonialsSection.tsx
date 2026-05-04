@@ -8,7 +8,7 @@ const defaultTestimonials = [
   {
     name: "Rashed Ahmed",
     location: "Dhaka",
-    text: "Trip Tastic made our family vacation to the Maldives absolutely seamless. From flights to the overwater villa, every detail was handled perfectly. Highly recommended!",
+    text: "TUBA ALHIJAZ made our family vacation to the Maldives absolutely seamless. From flights to the overwater villa, every detail was handled perfectly. Highly recommended!",
     rating: 5,
     trip: "Maldives Tour 2025",
   },
@@ -22,7 +22,7 @@ const defaultTestimonials = [
   {
     name: "Mohammad Hasan",
     location: "Sylhet",
-    text: "Booked our Umrah package with Trip Tastic and the experience was outstanding. Hotels near Haram, smooth transport, and dedicated support throughout the journey.",
+    text: "Booked our Umrah package with TUBA ALHIJAZ and the experience was outstanding. Hotels near Haram, smooth transport, and dedicated support throughout the journey.",
     rating: 5,
     trip: "Umrah 2025",
   },
