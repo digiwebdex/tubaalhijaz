@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,87 +6,90 @@
 
 @layer base {
   :root {
-    /* TRIP TASTIC — Refined brand palette: muted Gold + Deep Teal */
-    --background: 200 20% 98%;
-    --foreground: 200 30% 12%;
+    /* TUBA ALHIJAZ — Olive green + antique gold (premium hospitality) */
+    --background: 42 32% 96%;
+    --foreground: 80 20% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 30% 12%;
+    --card-foreground: 80 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 30% 12%;
+    --popover-foreground: 80 20% 12%;
 
-    /* Primary = Refined Gold (less saturated, more premium) */
-    --primary: 36 72% 48%;
+    /* Primary = Antique Gold */
+    --primary: 40 55% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 38 78% 58%;
+    --primary-glow: 42 70% 60%;
 
-    /* Secondary = Soft neutral surface */
-    --secondary: 200 18% 95%;
-    --secondary-foreground: 200 30% 12%;
-    --secondary-glow: 192 50% 32%;
+    /* Secondary = Cream surface */
+    --secondary: 42 30% 92%;
+    --secondary-foreground: 80 25% 14%;
+    --secondary-glow: 80 25% 22%;
 
-    --muted: 200 16% 94%;
-    --muted-foreground: 200 12% 42%;
+    --muted: 42 22% 90%;
+    --muted-foreground: 80 10% 38%;
 
-    /* Accent = Refined Deep Teal */
-    --accent: 192 58% 26%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent = Deep Olive */
+    --accent: 80 25% 22%;
+    --accent-foreground: 42 32% 96%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 15% 88%;
-    --input: 200 15% 88%;
-    --ring: 36 72% 48%;
+    --border: 42 18% 84%;
+    --input: 42 18% 84%;
+    --ring: 40 55% 48%;
 
     --radius: 0.875rem;
 
-    /* Brand-specific tokens (refined) */
-    --gold: 36 72% 48%;
-    --gold-light: 38 78% 58%;
-    --gold-dark: 32 70% 40%;
-    --charcoal: 200 35% 10%;
-    --charcoal-light: 200 28% 18%;
-    --emerald: 175 50% 32%;
-    --teal: 192 58% 26%;
-    --teal-light: 192 48% 36%;
-    --teal-dark: 195 65% 16%;
-    --ocean: 192 58% 26%;
-    --ocean-light: 192 48% 36%;
-    --sky: 192 45% 46%;
+    /* Brand-specific tokens */
+    --gold: 40 55% 48%;
+    --gold-light: 42 70% 60%;
+    --gold-dark: 36 60% 38%;
+    --charcoal: 80 28% 10%;
+    --charcoal-light: 80 20% 18%;
+    --emerald: 90 35% 22%;
+    --teal: 80 25% 22%;
+    --teal-light: 80 22% 32%;
+    --teal-dark: 80 30% 14%;
+    --ocean: 80 25% 22%;
+    --ocean-light: 80 22% 32%;
+    --sky: 80 18% 42%;
+    --olive: 80 25% 22%;
+    --olive-dark: 80 30% 14%;
+    --cream: 42 32% 96%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 200 30% 12%;
-    --sidebar-primary: 36 72% 48%;
+    --sidebar-foreground: 80 20% 12%;
+    --sidebar-primary: 40 55% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 18% 95%;
-    --sidebar-accent-foreground: 200 30% 12%;
-    --sidebar-border: 200 15% 88%;
-    --sidebar-ring: 36 72% 48%;
+    --sidebar-accent: 42 30% 92%;
+    --sidebar-accent-foreground: 80 25% 14%;
+    --sidebar-border: 42 18% 84%;
+    --sidebar-ring: 40 55% 48%;
 
-    --font-heading: 'Plus Jakarta Sans', 'Noto Sans Bengali', sans-serif;
+    --font-heading: 'Cormorant Garamond', 'Noto Sans Bengali', serif;
     --font-body: 'Manrope', 'Noto Sans Bengali', sans-serif;
-    --font-arabic: 'Noto Naskh Arabic', serif;
+    --font-arabic: 'Amiri', serif;
 
-    /* Refined gradients — softer mix of Teal & Gold */
-    --gradient-brand: linear-gradient(135deg, hsl(195 65% 16%) 0%, hsl(192 58% 26%) 60%, hsl(36 72% 48%) 100%);
-    --gradient-sunset: linear-gradient(135deg, hsl(38 78% 58%), hsl(36 72% 48%), hsl(32 70% 40%));
-    --gradient-ocean: linear-gradient(135deg, hsl(195 65% 16%), hsl(192 58% 26%), hsl(192 45% 46%));
-    --gradient-gold: linear-gradient(135deg, hsl(38 78% 58%), hsl(36 72% 48%), hsl(32 70% 40%));
-    --gradient-teal: linear-gradient(135deg, hsl(195 65% 16%), hsl(192 58% 26%), hsl(192 48% 36%));
-    --gradient-mix: linear-gradient(135deg, hsl(195 65% 16%) 0%, hsl(192 58% 26%) 50%, hsl(36 72% 48%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(200 20% 98%), hsl(200 18% 95%));
-    --gradient-dark: linear-gradient(135deg, hsl(200 35% 10%), hsl(195 30% 16%));
-    --gradient-hero-overlay: linear-gradient(180deg, hsl(200 35% 10% / 0.25) 0%, hsl(195 40% 12% / 0.55) 60%, hsl(195 50% 8% / 0.85) 100%);
+    /* Olive + Gold gradients */
+    --gradient-brand: linear-gradient(135deg, hsl(80 30% 14%) 0%, hsl(80 25% 22%) 60%, hsl(40 55% 48%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(42 70% 60%), hsl(40 55% 48%), hsl(36 60% 38%));
+    --gradient-ocean: linear-gradient(135deg, hsl(80 30% 14%), hsl(80 25% 22%), hsl(80 22% 32%));
+    --gradient-gold: linear-gradient(135deg, hsl(42 70% 60%), hsl(40 55% 48%), hsl(36 60% 38%));
+    --gradient-teal: linear-gradient(135deg, hsl(80 30% 14%), hsl(80 25% 22%), hsl(80 22% 32%));
+    --gradient-mix: linear-gradient(135deg, hsl(80 30% 14%) 0%, hsl(80 25% 22%) 50%, hsl(40 55% 48%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(42 32% 96%), hsl(42 30% 92%));
+    --gradient-dark: linear-gradient(135deg, hsl(80 28% 10%), hsl(80 22% 16%));
+    --gradient-hero-overlay: linear-gradient(180deg, hsl(80 28% 10% / 0.30) 0%, hsl(80 30% 12% / 0.55) 60%, hsl(80 35% 8% / 0.85) 100%);
 
-    --shadow-gold: 0 6px 22px hsl(36 72% 48% / 0.22);
-    --shadow-ocean: 0 6px 22px hsl(192 58% 26% / 0.20);
-    --shadow-teal: 0 6px 22px hsl(192 58% 26% / 0.20);
-    --shadow-soft: 0 2px 12px hsl(200 30% 12% / 0.05);
-    --shadow-luxury: 0 12px 40px hsl(200 30% 12% / 0.10);
-    --shadow-elevated: 0 20px 56px hsl(200 30% 12% / 0.14);
-    --shadow-glow: 0 0 48px hsl(36 72% 48% / 0.28);
+    --shadow-gold: 0 6px 22px hsl(40 55% 48% / 0.25);
+    --shadow-ocean: 0 6px 22px hsl(80 25% 22% / 0.22);
+    --shadow-teal: 0 6px 22px hsl(80 25% 22% / 0.22);
+    --shadow-soft: 0 2px 12px hsl(80 20% 12% / 0.05);
+    --shadow-luxury: 0 12px 40px hsl(80 20% 12% / 0.10);
+    --shadow-elevated: 0 20px 56px hsl(80 20% 12% / 0.14);
+    --shadow-glow: 0 0 48px hsl(40 55% 48% / 0.28);
   }
 
   .dark {

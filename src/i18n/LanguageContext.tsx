@@ -8,7 +8,7 @@ interface LanguageContextType {
   ready: boolean;
 }
 
-const STORAGE_KEY = "tt_language";
+const STORAGE_KEY = "tuba_language";
 const DEFAULT_LANG: Language = "en";
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
