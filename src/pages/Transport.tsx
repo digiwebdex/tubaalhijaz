@@ -56,9 +56,10 @@ export default function TransportPage() {
     <div className="min-h-screen bg-background">
       <SEOHead
         canonicalUrl="/transport"
-        title="Transport Service in Makkah & Madinah | TUBA ALHIJAZ"
-        description="Book private transport: Jeddah airport pickup, Makkah–Madinah transfers, Ziyarat tours. Sedan, SUV, Hiace, Coaster & buses with licensed drivers."
-        keywords="Umrah transport, Makkah Madinah transfer, Jeddah airport pickup, Ziyarat tour"
+        title="Makkah & Madinah Transport — Airport Pickup, Ziyarat & Hotel Transfers"
+        description="Book trusted Umrah transport in Saudi Arabia: Jeddah airport pickup, Makkah–Madinah transfers and Ziyarat tours from SAR 90. Sedan, GMC, Hiace & 50-seater coaches with licensed Arabic & English-speaking chauffeurs, 24/7 WhatsApp support and instant online confirmation."
+        keywords="Umrah transport, Makkah transport service, Madinah transport, Jeddah airport pickup Makkah, Makkah Madinah transfer price, Ziyarat tour Madinah, Hiace rent Makkah, GMC SUV Makkah, TUBA ALHIJAZ"
+        ogImage="/og-transport.jpg"
       />
       <Navbar />
 
