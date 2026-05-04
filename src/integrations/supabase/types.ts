@@ -2474,6 +2474,107 @@ export type Database = {
         }
         Relationships: []
       }
+      umrah_orders: {
+        Row: {
+          assigned_to: string | null
+          catering_package_id: string | null
+          created_at: string
+          customer_id: string | null
+          estimated_price_bdt: number
+          estimated_price_sar: number
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          include_hotel: boolean
+          include_reception: boolean
+          include_visa: boolean
+          include_ziyarat: boolean
+          internal_notes: string | null
+          madinah_nights: number
+          makkah_nights: number
+          num_travelers: number
+          passport_ready: boolean
+          program_tier: string
+          room_type: string | null
+          special_requests: string | null
+          status: string
+          tracking_id: string | null
+          transport_vehicle: string | null
+          travel_month: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          catering_package_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          estimated_price_bdt?: number
+          estimated_price_sar?: number
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          include_hotel?: boolean
+          include_reception?: boolean
+          include_visa?: boolean
+          include_ziyarat?: boolean
+          internal_notes?: string | null
+          madinah_nights?: number
+          makkah_nights?: number
+          num_travelers?: number
+          passport_ready?: boolean
+          program_tier?: string
+          room_type?: string | null
+          special_requests?: string | null
+          status?: string
+          tracking_id?: string | null
+          transport_vehicle?: string | null
+          travel_month?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          catering_package_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          estimated_price_bdt?: number
+          estimated_price_sar?: number
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          include_hotel?: boolean
+          include_reception?: boolean
+          include_visa?: boolean
+          include_ziyarat?: boolean
+          internal_notes?: string | null
+          madinah_nights?: number
+          makkah_nights?: number
+          num_travelers?: number
+          passport_ready?: boolean
+          program_tier?: string
+          room_type?: string | null
+          special_requests?: string | null
+          status?: string
+          tracking_id?: string | null
+          transport_vehicle?: string | null
+          travel_month?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umrah_orders_catering_package_id_fkey"
+            columns: ["catering_package_id"]
+            isOneToOne: false
+            referencedRelation: "catering_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

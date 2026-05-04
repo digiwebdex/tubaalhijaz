@@ -2,7 +2,7 @@ import {
   LayoutDashboard, FileText, Users, Package, CreditCard,
   Calculator, BarChart3, Pencil, Settings, LogOut, UserCheck, Truck,
   Hotel, Bell, AlertTriangle, BookOpen, DollarSign, RotateCcw, PieChart,
-  Plane, FileCheck, Map, Search, Upload, Shield, ShieldCheck, Bus, UtensilsCrossed,
+  Plane, FileCheck, Map, Search, Upload, Shield, ShieldCheck, Bus, UtensilsCrossed, ScrollText,
 } from "lucide-react";
 import logo from "@/assets/tuba-logo.png";
 import { NavLink } from "@/components/NavLink";
@@ -19,6 +19,7 @@ import type { AppRole } from "@/hooks/useUserRole";
 const mainMenuItems = [
   { title: "Dashboard",       url: "/admin",                icon: LayoutDashboard, roles: ["admin", "accountant", "viewer"] },
   { title: "Bookings",        url: "/admin/bookings",       icon: FileText,        roles: ["admin", "accountant", "booking", "viewer"] },
+  { title: "Umrah Orders",    url: "/admin/umrah-orders",   icon: ScrollText,      roles: ["admin", "accountant", "booking", "viewer"] },
   { title: "Customers",       url: "/admin/customers",      icon: Users,           roles: ["admin", "accountant", "booking", "viewer"] },
   { title: "Moallems",        url: "/admin/moallems",       icon: UserCheck,       roles: ["admin", "accountant", "booking", "viewer"] },
   { title: "Supplier Agents", url: "/admin/supplier-agents", icon: Truck,          roles: ["admin", "accountant", "viewer"] },

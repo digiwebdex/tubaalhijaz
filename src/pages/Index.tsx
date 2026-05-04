@@ -2,6 +2,8 @@ import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ServicesSection from "@/components/ServicesSection";
+import UmrahProgramsSection from "@/components/UmrahProgramsSection";
+import WhyChooseUsSection from "@/components/WhyChooseUsSection";
 import TransportSection from "@/components/TransportSection";
 import CateringSection from "@/components/CateringSection";
 import Footer from "@/components/Footer";
@@ -40,6 +42,8 @@ const Index = () => {
         <Navbar />
         {show("hero") && <HeroSection />}
         {show("services") && <ServicesSection />}
+        {show("programs") && <UmrahProgramsSection />}
+        {show("why-us") && <WhyChooseUsSection />}
         {show("transport") && <TransportSection />}
         {show("catering") && <CateringSection />}
         {show("about") && (
