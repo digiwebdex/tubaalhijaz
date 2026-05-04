@@ -13,6 +13,7 @@ import { supabase } from "@/lib/api";
 import { useLanguage } from "@/i18n/LanguageContext";
 import TransportOrderDialog, { TransportService } from "@/components/TransportOrderDialog";
 import ServiceGallery from "@/components/ServiceGallery";
+import ReviewsSection from "@/components/ReviewsSection";
 import transportImg from "@/assets/tuba-transport.jpg";
 
 const fallback: TransportService[] = [
@@ -165,6 +166,9 @@ export default function TransportPage() {
           bn: "মক্কা, মদিনা ও জেদ্দায় আমাদের প্রতিদিনের ট্রান্সপোর্ট সার্ভিসের ছবি ও ভিডিও।",
         }}
       />
+
+      {/* Reviews */}
+      <ReviewsSection title={{ en: "What our pilgrims say", bn: "আমাদের যাত্রীদের কথা" }} />
 
       {/* CTA */}
       <section className="relative py-24 overflow-hidden bg-gradient-to-br from-charcoal via-charcoal/95 to-charcoal/90">
