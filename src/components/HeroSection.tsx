@@ -306,6 +306,8 @@ const HeroSection = () => {
               );
             })}
           </div>
+        </div>
+      </div>
 
       {/* Arrows */}
       <button
