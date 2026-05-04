@@ -2,9 +2,8 @@ import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ServicesSection from "@/components/ServicesSection";
-import PackagesSection from "@/components/PackagesSection";
-import FacilitiesSection from "@/components/FacilitiesSection";
-import TypedPackageSection from "@/components/TypedPackageSection";
+import TransportSection from "@/components/TransportSection";
+import CateringSection from "@/components/CateringSection";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import BackToTop from "@/components/BackToTop";
@@ -12,7 +11,6 @@ import { useSectionVisibility } from "@/hooks/useSectionVisibility";
 import SEOHead, { organizationJsonLd } from "@/components/SEOHead";
 import { SiteContentProvider } from "@/hooks/useSiteContentProvider";
 
-// Lazy load below-fold sections with retry for stale chunk errors
 const lazyRetry = (importFn: () => Promise<any>) =>
   lazy(() =>
     importFn().catch(() => {
@@ -21,10 +19,6 @@ const lazyRetry = (importFn: () => Promise<any>) =>
     })
   );
 
-
-const VideoGuideSection = lazyRetry(() => import("@/components/VideoGuideSection"));
-const GallerySection = lazyRetry(() => import("@/components/GallerySection"));
-const TestimonialsSection = lazyRetry(() => import("@/components/TestimonialsSection"));
 const AboutSection = lazyRetry(() => import("@/components/AboutSection"));
 const ContactSection = lazyRetry(() => import("@/components/ContactSection"));
 
@@ -39,25 +33,15 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <SEOHead
           canonicalUrl="/"
-          description="TRIP TASTIC — Hajj, Umrah, international tours, air tickets, visa processing & air ambulance. Your trusted travel partner."
-          keywords="TRIP TASTIC, travel agency Bangladesh, Hajj package, Umrah package, tour package, air ticket, tourist visa, business visa, medical visa, work visa, air ambulance"
+          description="TUBA ALHIJAZ — Makkah-based premium Umrah Visa, hotel booking, transport and catering services."
+          keywords="TUBA ALHIJAZ, Umrah visa, Makkah hotel, Umrah transport, halal catering, Hajj"
           jsonLd={organizationJsonLd()}
         />
         <Navbar />
         {show("hero") && <HeroSection />}
         {show("services") && <ServicesSection />}
-        {show("packages") && <PackagesSection />}
-        {show("facilities") && <FacilitiesSection />}
-        {show("gallery") && (
-          <Suspense fallback={<SectionFallback />}>
-            <GallerySection />
-          </Suspense>
-        )}
-        {show("testimonials") && (
-          <Suspense fallback={<SectionFallback />}>
-            <TestimonialsSection />
-          </Suspense>
-        )}
+        {show("transport") && <TransportSection />}
+        {show("catering") && <CateringSection />}
         {show("about") && (
           <Suspense fallback={<SectionFallback />}>
             <AboutSection />
@@ -77,3 +61,4 @@ const Index = () => {
 };
 
 export default Index;
+

@@ -502,6 +502,122 @@ export type Database = {
         }
         Relationships: []
       }
+      catering_orders: {
+        Row: {
+          created_at: string
+          currency: string
+          customer_id: string | null
+          days: number
+          delivery_address: string | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          notes: string | null
+          package_id: string | null
+          persons: number
+          start_date: string | null
+          status: string
+          total_price: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          days?: number
+          delivery_address?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          package_id?: string | null
+          persons?: number
+          start_date?: string | null
+          status?: string
+          total_price?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          days?: number
+          delivery_address?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          package_id?: string | null
+          persons?: number
+          start_date?: string | null
+          status?: string
+          total_price?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catering_orders_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "catering_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catering_packages: {
+        Row: {
+          created_at: string
+          cuisine: string | null
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          meal_type: string
+          min_persons: number
+          name: string
+          price_per_meal: number
+          show_on_website: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meal_type: string
+          min_persons?: number
+          name: string
+          price_per_meal?: number
+          show_on_website?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          meal_type?: string
+          min_persons?: number
+          name?: string
+          price_per_meal?: number
+          show_on_website?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cms_versions: {
         Row: {
           content: Json
@@ -2246,6 +2362,117 @@ export type Database = {
             referencedColumns: ["booking_id"]
           },
         ]
+      }
+      transport_bookings: {
+        Row: {
+          created_at: string
+          currency: string
+          customer_id: string | null
+          dropoff_location: string
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          notes: string | null
+          passengers: number
+          pickup_datetime: string | null
+          pickup_location: string
+          status: string
+          total_price: number
+          updated_at: string
+          user_id: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          dropoff_location: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          passengers?: number
+          pickup_datetime?: string | null
+          pickup_location: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+          user_id?: string | null
+          vehicle_type: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          dropoff_location?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          passengers?: number
+          pickup_datetime?: string | null
+          pickup_location?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+          user_id?: string | null
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
+      transport_services: {
+        Row: {
+          capacity: number
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          price_bdt: number
+          price_sar: number
+          route_from: string | null
+          route_to: string | null
+          show_on_website: boolean
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          price_bdt?: number
+          price_sar?: number
+          route_from?: string | null
+          route_to?: string | null
+          show_on_website?: boolean
+          updated_at?: string
+          vehicle_type: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          price_bdt?: number
+          price_sar?: number
+          route_from?: string | null
+          route_to?: string | null
+          show_on_website?: boolean
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

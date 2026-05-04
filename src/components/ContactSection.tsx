@@ -13,10 +13,12 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
   const [loading, setLoading] = useState(false);
 
   const lc = content?.[language];
-  const phone = content?.phone || "+880 1711-925400";
-  const email = lc?.email || content?.email || "info@triptastic.com.bd";
-  const location = lc?.location || content?.location || t("contact.location.default");
-  const hours = lc?.hours || content?.hours || t("contact.hours.default");
+  const phone = content?.phone || "+966 53 491 9814";
+  const email = lc?.email || content?.email || "tubaalhijaz@gmail.com";
+  const location = lc?.location || content?.location || (bn
+    ? "9QPP+H8Q, কিং ফাহাদ রোড, আল-আসকান,\nমক্কা মুকাররমা ২৪৩৪২, সৌদি আরব"
+    : "9QPP+H8Q, King Fahd Road, Al-Askan,\nMakkah Al-Mukarramah 24342, KSA");
+  const hours = lc?.hours || content?.hours || (bn ? "শনি – বৃহঃ : ৯টা – রাত ১০টা" : "Sat – Thu : 9 AM – 10 PM");
 
   const contactItems = [
     { icon: Phone, label: t("contact.phone"), value: phone, href: `tel:${phone.replace(/[\s-]/g, "")}` },

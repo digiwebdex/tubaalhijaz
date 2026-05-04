@@ -3,7 +3,7 @@ import { Menu, X, Phone, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "@/assets/triptastic-logo.png";
+import logo from "@/assets/tuba-logo.png";
 import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useMenuVisibility } from "@/components/admin/MenuVisibilityManager";
@@ -18,17 +18,16 @@ const Navbar = () => {
   const { language, t } = useLanguage();
   const { visibility: menuVisibility } = useMenuVisibility();
 
-  const phone = content?.phone || "+880 1711-925400";
+  const phone = content?.phone || "+966 53 491 9814";
 
   const allNavLinks = [
     { key: "home", label: t("nav.home"), href: "#hero" },
     { key: "services", label: t("nav.services"), href: "#services" },
-    { key: "packages", label: t("nav.packages"), href: "#packages" },
+    { key: "transport", label: language === "bn" ? "ট্রান্সপোর্ট" : "Transport", href: "#transport" },
+    { key: "catering", label: language === "bn" ? "ক্যাটারিং" : "Catering", href: "#catering" },
     { key: "hotels", label: t("nav.hotels"), href: "/hotels" },
-    { key: "gallery", label: t("nav.gallery"), href: "#gallery" },
     { key: "about", label: t("nav.about"), href: "#about" },
     { key: "contact", label: t("nav.contact"), href: "#contact" },
-    { key: "track", label: t("nav.track"), href: "/track" },
   ];
 
   const navLinks = allNavLinks.filter((link) => menuVisibility[link.key] !== false);
@@ -65,7 +64,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-24 px-4">
         <button onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center cursor-pointer py-2">
-          <img src={logo} alt="TRIP TASTIC Logo" className="block h-12 w-auto max-w-[180px] object-contain lg:h-14" />
+          <img src={logo} alt="TUBA ALHIJAZ Logo" className="block h-14 w-auto max-w-[200px] object-contain lg:h-16" />
         </button>
 
         <div className="hidden lg:flex items-center gap-8">
