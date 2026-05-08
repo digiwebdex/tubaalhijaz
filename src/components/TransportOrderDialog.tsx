@@ -40,6 +40,12 @@ export default function TransportOrderDialog({ open, onOpenChange, service }: Pr
     pickup_address: "",
     dropoff_address: "",
     notes: "",
+    route_type: "",
+    flight_number: "",
+    arrival_airport: "",
+    hotel_destination: "",
+    makkah_hotel_name: "",
+    madinah_hotel_name: "",
   });
 
   const total = useMemo(() => Number(service?.price_sar || 0), [service]);
@@ -50,6 +56,8 @@ export default function TransportOrderDialog({ open, onOpenChange, service }: Pr
       pickup_date: "", pickup_time: "", passengers: 1,
       guest_name: "", guest_phone: "", guest_email: "",
       pickup_address: "", dropoff_address: "", notes: "",
+      route_type: "", flight_number: "", arrival_airport: "",
+      hotel_destination: "", makkah_hotel_name: "", madinah_hotel_name: "",
     });
   };
 
