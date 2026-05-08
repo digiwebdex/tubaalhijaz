@@ -142,6 +142,60 @@ export default function TransportOrderDialog({ open, onOpenChange, service }: Pr
               <Label>{isBn ? "যাত্রী সংখ্যা" : "Passengers"}</Label>
               <Input type="number" min={1} max={50} value={form.passengers} onChange={(e) => setForm({ ...form, passengers: Number(e.target.value) })} />
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{isBn ? "রুট টাইপ" : "Route Type"}</Label>
+                <Select value={form.route_type} onValueChange={(v) => setForm({ ...form, route_type: v })}>
+                  <SelectTrigger><SelectValue placeholder={isBn ? "নির্বাচন করুন" : "Select"} /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">{isBn ? "ফুল রুট" : "Full Route"}</SelectItem>
+                    <SelectItem value="single">{isBn ? "সিঙ্গেল রুট" : "Single Route"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{isBn ? "ফ্লাইট নাম্বার" : "Flight Number"}</Label>
+                <Input value={form.flight_number} onChange={(e) => setForm({ ...form, flight_number: e.target.value })} placeholder="e.g. SV805" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{isBn ? "এয়ারপোর্ট" : "Arrival Airport"}</Label>
+                <Select value={form.arrival_airport} onValueChange={(v) => setForm({ ...form, arrival_airport: v })}>
+                  <SelectTrigger><SelectValue placeholder={isBn ? "নির্বাচন করুন" : "Select"} /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="JED">Jeddah (JED)</SelectItem>
+                    <SelectItem value="MED">Madinah (MED)</SelectItem>
+                    <SelectItem value="RUH">Riyadh (RUH)</SelectItem>
+                    <SelectItem value="DMM">Dammam (DMM)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{isBn ? "হোটেল গন্তব্য" : "Hotel Destination"}</Label>
+                <Select value={form.hotel_destination} onValueChange={(v) => setForm({ ...form, hotel_destination: v })}>
+                  <SelectTrigger><SelectValue placeholder={isBn ? "নির্বাচন করুন" : "Select"} /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="makkah">Makkah</SelectItem>
+                    <SelectItem value="madinah">Madinah</SelectItem>
+                    <SelectItem value="jeddah">Jeddah</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{isBn ? "মক্কা হোটেল" : "Makkah Hotel Name"}</Label>
+                <Input value={form.makkah_hotel_name} onChange={(e) => setForm({ ...form, makkah_hotel_name: e.target.value })} />
+              </div>
+              <div>
+                <Label>{isBn ? "মদিনা হোটেল" : "Madinah Hotel Name"}</Label>
+                <Input value={form.madinah_hotel_name} onChange={(e) => setForm({ ...form, madinah_hotel_name: e.target.value })} />
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{isBn ? "পূর্ণ নাম" : "Full Name"} *</Label>
