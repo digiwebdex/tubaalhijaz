@@ -1193,7 +1193,7 @@ export default function AdminBookingsPage() {
                   pickup_time: viewBooking.pickup_time,
                   driver_notes: viewBooking.driver_notes,
                 }}
-                onSaved={() => fetchData?.()}
+                onSaved={fetchBookings}
               />
             </div>
           )}
