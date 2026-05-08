@@ -382,6 +382,7 @@ const TrackBooking = () => {
                         dueAmount={Number(booking.due_amount)}
                         customerName={booking.guest_name}
                         customerPhone={booking.guest_phone}
+                        bookingStatus={booking.status}
                         label={`Pay ৳${Number(booking.due_amount).toLocaleString("en-IN")} Online`}
                       />
                     </div>
