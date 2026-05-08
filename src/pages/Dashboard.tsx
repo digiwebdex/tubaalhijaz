@@ -429,6 +429,7 @@ const Dashboard = () => {
                           customerName={profile?.full_name}
                           customerPhone={profile?.phone}
                           customerEmail={user?.email}
+                          bookingStatus={b.status}
                           size="sm"
                           label={`Pay ৳${Number(b.due_amount).toLocaleString("en-IN")}`}
                         />

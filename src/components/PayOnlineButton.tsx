@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useCurrencyRate, bdtToSar, formatSAR } from "@/hooks/useCurrencyRate";
 
 interface Props {
   bookingId?: string;
@@ -13,6 +14,7 @@ interface Props {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
+  bookingStatus?: string;
   size?: "sm" | "default" | "lg";
   variant?: "default" | "outline" | "secondary";
   className?: string;
@@ -21,9 +23,20 @@ interface Props {
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
+// Statuses where the voucher is considered confirmed and online payment is unlocked.
+const PAYMENT_UNLOCKED_STATUSES = new Set([
+  "confirmed",
+  "visa_processing",
+  "visa_issued",
+  "ticket_processing",
+  "ticket_issued",
+  "ticket_confirmed",
+  "completed",
+]);
+
 export const PayOnlineButton = ({
   bookingId, trackingId, dueAmount, customerName, customerPhone, customerEmail,
-  size = "default", variant = "default", className, label = "Pay Online",
+  bookingStatus, size = "default", variant = "default", className, label = "Pay Online",
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState<string>(String(dueAmount || 0));
@@ -31,6 +44,11 @@ export const PayOnlineButton = ({
   const [name, setName] = useState(customerName || "");
   const [email, setEmail] = useState(customerEmail || "");
   const [loading, setLoading] = useState(false);
+  const { rate } = useCurrencyRate();
+
+  const isUnlocked = !bookingStatus || PAYMENT_UNLOCKED_STATUSES.has(bookingStatus);
+  const sarEquivalent = bdtToSar(Number(amount) || 0, rate.sar_to_bdt);
+  const dueSar = bdtToSar(Number(dueAmount) || 0, rate.sar_to_bdt);
 
   const handlePay = async () => {
     const amt = Number(amount);
@@ -61,6 +79,20 @@ export const PayOnlineButton = ({
 
   if (Number(dueAmount) <= 0) return null;
 
+  if (!isUnlocked) {
+    return (
+      <Button
+        size={size}
+        variant="outline"
+        className={className}
+        disabled
+        title="Voucher confirm হওয়ার পরে Payment Option চালু হবে"
+      >
+        <Lock className="h-4 w-4 mr-2" /> Payment Locked
+      </Button>
+    );
+  }
+
   return (
     <>
       <Button size={size} variant={variant} className={className} onClick={() => setOpen(true)}>
@@ -71,14 +103,24 @@ export const PayOnlineButton = ({
           <DialogHeader>
             <DialogTitle>Pay Online</DialogTitle>
             <DialogDescription>
-              bKash, Nagad, Rocket, Card — সব accept করি (SSLCommerz secure gateway)।
+              bKash, Nagad, Rocket, Card, International — সব accept করি (SSLCommerz secure gateway)।
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
+            <div className="bg-secondary/50 border border-border rounded-md p-3 text-sm flex items-center justify-between">
+              <span className="text-muted-foreground">Total Due</span>
+              <span className="font-semibold tabular-nums">
+                {formatSAR(dueSar)}
+                <span className="text-muted-foreground font-normal mx-1.5">≈</span>
+                ৳{Number(dueAmount).toLocaleString("en-IN")}
+              </span>
+            </div>
             <div>
-              <Label>Amount (৳)</Label>
+              <Label>Amount to pay (৳ BDT)</Label>
               <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} max={dueAmount} />
-              <p className="text-xs text-muted-foreground mt-1">Due: ৳{Number(dueAmount).toLocaleString("en-IN")}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                ≈ {formatSAR(sarEquivalent)} (1 SAR = ৳{rate.sar_to_bdt})
+              </p>
             </div>
             <div>
               <Label>Name</Label>

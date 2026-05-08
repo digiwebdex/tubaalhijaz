@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, X, Bell, PenTool, Database, LayoutGrid, FileText } from "lucide-react";
+import { Plus, X, Bell, PenTool, Database, LayoutGrid, FileText, Coins } from "lucide-react";
 import AdminDocumentViewer from "@/components/AdminDocumentViewer";
+import CurrencyRateSettings from "@/components/admin/CurrencyRateSettings";
 import { useAdminRole } from "@/components/admin/AdminLayout";
 import NotificationSettingsManager from "@/components/admin/NotificationSettingsManager";
 import SignatureSettingsManager from "@/components/admin/SignatureSettingsManager";
@@ -126,6 +127,18 @@ export default function AdminSettingsPage() {
           </h2>
           <div className="bg-card border border-border rounded-lg p-5">
             <NotificationSettingsManager />
+          </div>
+        </section>
+      )}
+
+      {/* Riyal Rate / Currency (Admin only) */}
+      {currentRole === "admin" && (
+        <section id="currency-rate">
+          <h2 className="font-heading text-xl font-bold flex items-center gap-2 mb-4">
+            <Coins className="h-5 w-5 text-primary" /> Riyal Rate & Currency Display
+          </h2>
+          <div className="bg-card border border-border rounded-lg p-5">
+            <CurrencyRateSettings />
           </div>
         </section>
       )}
