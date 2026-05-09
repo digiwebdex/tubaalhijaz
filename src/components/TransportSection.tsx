@@ -1,9 +1,22 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { Bus, Car, MapPin } from "lucide-react";
-import transportImg from "@/assets/tuba-transport.jpg";
+import busImg from "@/assets/transport-bus.jpg";
+import coasterImg from "@/assets/transport-coaster.jpg";
+import hiaceImg from "@/assets/transport-hiace.jpg";
+import suvImg from "@/assets/transport-suv.jpg";
+import sedanImg from "@/assets/transport-sedan.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/api";
+
+const collage = [
+  { key: "bus", img: busImg, label: { en: "Bus", bn: "বাস" } },
+  { key: "coaster", img: coasterImg, label: { en: "Coaster", bn: "কোস্টার" } },
+  { key: "hiace", img: hiaceImg, label: { en: "Hiace", bn: "হায়েস" } },
+  { key: "suv", img: suvImg, label: { en: "SUV", bn: "এসইউভি" } },
+  { key: "sedan", img: sedanImg, label: { en: "Sedan", bn: "সেডান" } },
+];
 
 const fallback = [
   { vehicle_type: "Bus (1–50 pax)", route_from: "Jeddah Airport", route_to: "Makkah Hotel", price_sar: 1800 },
