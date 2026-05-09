@@ -4,6 +4,7 @@ import CmsBlogManager from "@/components/admin/CmsBlogManager";
 import CmsVersionHistory from "@/components/admin/CmsVersionHistory";
 import SectionVisibilityManager from "@/components/admin/SectionVisibilityManager";
 import MenuVisibilityManager from "@/components/admin/MenuVisibilityManager";
+import GalleryVideoManager from "@/components/admin/GalleryVideoManager";
 
 export default function AdminCmsPage() {
   return (
@@ -14,6 +15,7 @@ export default function AdminCmsPage() {
           <TabsTrigger value="pages">Site Content</TabsTrigger>
           <TabsTrigger value="visibility">Section Visibility</TabsTrigger>
           <TabsTrigger value="menu">Menu Settings</TabsTrigger>
+          <TabsTrigger value="gallery-videos">Gallery Videos</TabsTrigger>
           <TabsTrigger value="blog">Blog Posts</TabsTrigger>
           <TabsTrigger value="history">Version History</TabsTrigger>
         </TabsList>
@@ -37,6 +39,9 @@ export default function AdminCmsPage() {
             </div>
             <MenuVisibilityManager />
           </div>
+        </TabsContent>
+        <TabsContent value="gallery-videos">
+          <GalleryVideoManager />
         </TabsContent>
         <TabsContent value="blog">
           <CmsBlogManager />
