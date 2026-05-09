@@ -164,7 +164,9 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     padding-bottom: 0.15em;
+    padding-right: 0.18em;
     line-height: 1.35;
+    display: inline-block;
   }
   .text-gradient-ocean {
     background: var(--gradient-ocean);
@@ -172,7 +174,9 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     padding-bottom: 0.15em;
+    padding-right: 0.18em;
     line-height: 1.35;
+    display: inline-block;
   }
   .text-gradient-brand {
     background: var(--gradient-brand);
@@ -180,7 +184,16 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     padding-bottom: 0.15em;
+    padding-right: 0.18em;
     line-height: 1.35;
+    display: inline-block;
+  }
+  /* Italic Bengali text overflows its box on the right; add breathing room */
+  html[lang="bn"] em,
+  html[lang="bn"] i,
+  html[lang="bn"] .italic {
+    padding-right: 0.25em;
+    display: inline-block;
   }
   .bg-gradient-gold,
   .bg-gradient-sunset { background: var(--gradient-sunset); }
@@ -196,6 +209,8 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-right: 0.18em;
+    display: inline-block;
   }
   .text-teal { color: hsl(var(--teal)); }
   .bg-teal { background-color: hsl(var(--teal)); }
