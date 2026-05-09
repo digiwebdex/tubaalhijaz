@@ -51,9 +51,61 @@ export default function DriverInfoEditor({ bookingId, initial, onSaved }: Props)
     });
   }, [bookingId, initial]);
 
+  const buildMessage = (trackingId: string) => {
+    const lines = [
+      `Assalamu Alaikum! আপনার trip (${trackingId}) এর Driver Information:`,
+      form.driver_name ? `• Driver: ${form.driver_name}` : "",
+      form.driver_phone ? `• Contact: ${form.driver_phone}` : "",
+      form.vehicle_number ? `• Vehicle: ${form.vehicle_number}` : "",
+      form.pickup_time ? `• Pickup Time: ${new Date(form.pickup_time).toLocaleString("en-GB")}` : "",
+      form.pickup_location ? `• Pickup Location: ${form.pickup_location}` : "",
+      form.driver_notes ? `• Note: ${form.driver_notes}` : "",
+      "",
+      "— TRIP TASTIC | +880 1711-999910",
+    ].filter(Boolean);
+    return lines.join("\n");
+  };
+
+  const sendNotifications = async (booking: any) => {
+    if (!booking) return;
+    const message = buildMessage(booking.tracking_id || "");
+    const subject = `🚗 Driver Assigned — ${booking.tracking_id || ""}`;
+    try {
+      await supabase.functions.invoke("send-notification", {
+        body: {
+          type: "custom",
+          channels: ["email", "sms"],
+          user_id: booking.user_id || "00000000-0000-0000-0000-000000000000",
+          booking_id: booking.id,
+          custom_subject: subject,
+          custom_message: message.replace(/\n/g, "<br/>"),
+        },
+      });
+    } catch (e) {
+      console.warn("notification dispatch failed", e);
+    }
+  };
+
+  const openWhatsApp = async () => {
+    const { data: b } = await supabase
+      .from("bookings")
+      .select("tracking_id, customer_phone, profiles:user_id(phone)")
+      .eq("id", bookingId)
+      .maybeSingle();
+    const phone = (b as any)?.customer_phone || (b as any)?.profiles?.phone || "";
+    const cleaned = String(phone).replace(/[^\d]/g, "");
+    if (!cleaned) {
+      toast.error("যাত্রীর phone number পাওয়া যায়নি");
+      return;
+    }
+    const wa = cleaned.startsWith("880") ? cleaned : `880${cleaned.replace(/^0/, "")}`;
+    const text = encodeURIComponent(buildMessage((b as any)?.tracking_id || ""));
+    window.open(`https://wa.me/${wa}?text=${text}`, "_blank");
+  };
+
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("bookings")
       .update({
         driver_name: form.driver_name || null,
@@ -63,10 +115,13 @@ export default function DriverInfoEditor({ bookingId, initial, onSaved }: Props)
         pickup_time: form.pickup_time ? new Date(form.pickup_time).toISOString() : null,
         driver_notes: form.driver_notes || null,
       })
-      .eq("id", bookingId);
+      .eq("id", bookingId)
+      .select("id, tracking_id, user_id")
+      .maybeSingle();
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Driver info updated — যাত্রী Dashboard থেকে দেখতে পাবে");
+    toast.success("Driver info updated — যাত্রীকে Email + SMS notification পাঠানো হলো");
+    sendNotifications(updated);
     onSaved?.();
   };
 
