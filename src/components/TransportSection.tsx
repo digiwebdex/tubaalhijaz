@@ -44,6 +44,7 @@ const TransportSection = () => {
   });
 
   const services = data && data.length > 0 ? data : fallback;
+  const [active, setActive] = useState(0);
 
   return (
     <section id="transport" className="py-24 bg-secondary/40 relative overflow-hidden">
@@ -55,12 +56,53 @@ const TransportSection = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <img
-              src={transportImg}
-              alt="TUBA ALHIJAZ transport vehicles"
-              loading="lazy"
-              className="rounded-3xl shadow-luxury w-full object-cover aspect-[4/3]"
-            />
+            <div className="relative rounded-3xl overflow-hidden shadow-luxury aspect-[4/3] bg-secondary">
+              {/* Main featured image */}
+              <div className="absolute inset-0">
+                {collage.map((c, i) => (
+                  <motion.img
+                    key={c.key}
+                    src={c.img}
+                    alt={`TUBA ALHIJAZ ${c.label.en}`}
+                    loading="lazy"
+                    width={1024}
+                    height={1024}
+                    initial={false}
+                    animate={{ opacity: active === i ? 1 : 0, scale: active === i ? 1 : 1.05 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ))}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute bottom-4 left-5 right-5 text-white">
+                  <div className="text-xs tracking-[0.3em] uppercase opacity-80">{isBn ? "ফিচারড" : "Featured"}</div>
+                  <div className="font-heading text-3xl font-bold">
+                    {isBn ? collage[active].label.bn : collage[active].label.en}
+                  </div>
+                </div>
+              </div>
+
+              {/* Thumbnail strip */}
+              <div className="absolute top-4 left-4 right-4 grid grid-cols-5 gap-2">
+                {collage.map((c, i) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onMouseEnter={() => setActive(i)}
+                    onFocus={() => setActive(i)}
+                    onClick={() => setActive(i)}
+                    aria-label={c.label.en}
+                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      active === i ? "border-primary scale-105 shadow-lg" : "border-white/40 hover:border-white"
+                    }`}
+                  >
+                    <img src={c.img} alt={c.label.en} loading="lazy" className="w-full h-full object-cover" />
+                    <div className={`absolute inset-0 ${active === i ? "bg-primary/20" : "bg-black/30 hover:bg-black/0"} transition`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="absolute -bottom-6 -right-6 bg-card border border-border rounded-2xl p-5 shadow-elevated">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-sunset flex items-center justify-center">
