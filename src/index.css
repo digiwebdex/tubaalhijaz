@@ -125,6 +125,35 @@
     font-family: var(--font-heading);
     letter-spacing: -0.02em;
   }
+
+  /* Bengali language: use Noto Sans Bengali as primary, relax spacing & line-height
+     to prevent ascenders/descenders (matra/hasanta) from being clipped. */
+  html[lang="bn"] body,
+  html[lang="bn"] h1,
+  html[lang="bn"] h2,
+  html[lang="bn"] h3,
+  html[lang="bn"] h4,
+  html[lang="bn"] h5,
+  html[lang="bn"] h6,
+  html[lang="bn"] button,
+  html[lang="bn"] input,
+  html[lang="bn"] textarea,
+  html[lang="bn"] select {
+    font-family: 'Noto Sans Bengali', 'Manrope', sans-serif;
+    letter-spacing: 0;
+  }
+  html[lang="bn"] h1,
+  html[lang="bn"] h2,
+  html[lang="bn"] h3,
+  html[lang="bn"] h4,
+  html[lang="bn"] h5,
+  html[lang="bn"] h6 {
+    line-height: 1.5;
+    padding-bottom: 0.15em;
+  }
+  html[lang="bn"] body {
+    line-height: 1.7;
+  }
 }
 
 @layer utilities {
@@ -134,20 +163,25 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-bottom: 0.15em;
+    line-height: 1.35;
   }
   .text-gradient-ocean {
     background: var(--gradient-ocean);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-bottom: 0.15em;
+    line-height: 1.35;
   }
   .text-gradient-brand {
     background: var(--gradient-brand);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-bottom: 0.15em;
+    line-height: 1.35;
   }
-
   .bg-gradient-gold,
   .bg-gradient-sunset { background: var(--gradient-sunset); }
   .bg-gradient-ocean { background: var(--gradient-ocean); }
