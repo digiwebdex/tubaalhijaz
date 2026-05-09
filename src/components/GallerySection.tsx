@@ -176,6 +176,13 @@ export default function GallerySection() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       loading="lazy"
                     />
+                  ) : item.type === "youtube" ? (
+                    <img
+                      src={getYouTubeThumbnail(item.src) || ""}
+                      alt={item.title || `Video ${i + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      loading="lazy"
+                    />
                   ) : (
                     <video
                       src={item.src}
@@ -189,13 +196,18 @@ export default function GallerySection() {
                     {item.category}
                   </div>
                   <div className="absolute inset-0 bg-[hsl(220,25%,10%)]/0 group-hover:bg-[hsl(220,25%,10%)]/40 transition-colors flex items-center justify-center">
-                    {item.type === "video" ? (
+                    {item.type === "video" || item.type === "youtube" ? (
                       <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-gold opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
                         <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
                       </div>
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <ImageIcon className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                    )}
+                    {item.title && (item.type === "video" || item.type === "youtube") && (
+                      <div className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium line-clamp-2 drop-shadow">
+                        {item.title}
                       </div>
                     )}
                   </div>
