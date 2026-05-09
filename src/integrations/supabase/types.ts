@@ -2590,6 +2590,81 @@ export type Database = {
         }
         Relationships: []
       }
+      transport_voucher_orders: {
+        Row: {
+          agent_country: string | null
+          agent_name: string | null
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          flights: Json
+          group_numbers: string[]
+          hotels: Json
+          id: string
+          internal_movements: Json
+          notes: string | null
+          ops_24h_phone: string | null
+          package_name: string | null
+          pilgrim_count: number | null
+          status: string
+          supervisor_madinah_phone: string | null
+          supervisor_makkah_phone: string | null
+          transport_type: string | null
+          travel_date: string | null
+          umrah_company: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_country?: string | null
+          agent_name?: string | null
+          contact_email?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          flights?: Json
+          group_numbers?: string[]
+          hotels?: Json
+          id?: string
+          internal_movements?: Json
+          notes?: string | null
+          ops_24h_phone?: string | null
+          package_name?: string | null
+          pilgrim_count?: number | null
+          status?: string
+          supervisor_madinah_phone?: string | null
+          supervisor_makkah_phone?: string | null
+          transport_type?: string | null
+          travel_date?: string | null
+          umrah_company?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_country?: string | null
+          agent_name?: string | null
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          flights?: Json
+          group_numbers?: string[]
+          hotels?: Json
+          id?: string
+          internal_movements?: Json
+          notes?: string | null
+          ops_24h_phone?: string | null
+          package_name?: string | null
+          pilgrim_count?: number | null
+          status?: string
+          supervisor_madinah_phone?: string | null
+          supervisor_makkah_phone?: string | null
+          transport_type?: string | null
+          travel_date?: string | null
+          umrah_company?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       umrah_orders: {
         Row: {
           assigned_to: string | null
