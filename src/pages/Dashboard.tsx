@@ -5,7 +5,7 @@ import { supabase } from "@/lib/api";
 import { toast } from "sonner";
 import {
   LogOut, Package, CreditCard, AlertTriangle, User, FileText,
-  ChevronDown, ChevronUp, Search, Save, MapPin, Phone, Mail, Settings, Download
+  ChevronDown, ChevronUp, Search, Save, MapPin, Phone, Mail, Settings, Download, History
 } from "lucide-react";
 import { motion } from "framer-motion";
 import logo from "@/assets/logo.png";
