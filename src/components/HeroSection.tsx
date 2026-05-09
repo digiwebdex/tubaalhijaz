@@ -114,7 +114,7 @@ const slides: Slide[] = [
       { en: "Biometric appointment support", bn: "বায়োমেট্রিক অ্যাপয়েন্টমেন্ট সাপোর্ট" },
     ],
     stats: [
-      { label: { en: "Processing", bn: "প্রসেসিং" }, value: "Within 24 Hours" },
+      { label: { en: "Processing", bn: "প্রসেসিং" }, value: "Within 12 Hours" },
     ],
   },
 ];
