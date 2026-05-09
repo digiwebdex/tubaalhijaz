@@ -36,6 +36,7 @@ const Index = () => {
         {show("transport") && <TransportSection />}
         {show("catering") && <CateringSection />}
         {show("about") && <AboutSection />}
+        {show("gallery") && <GallerySection />}
         {show("contact") && <ContactSection />}
         <Footer />
         <WhatsAppFloat />
