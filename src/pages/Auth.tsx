@@ -183,8 +183,8 @@ const Auth = () => {
           </p>
         </div>
 
-        {/* OTP / Email toggle for login */}
-        {(mode === "login" || mode === "otp") && (
+        {/* OTP / Email toggle for login — OTP disabled for now. Set to true to re-enable. */}
+        {OTP_LOGIN_ENABLED && (mode === "login" || mode === "otp") && (
           <div className="flex gap-1 mb-4 bg-secondary rounded-lg p-1">
             <button
               onClick={() => { setMode("login"); setOtpSent(false); setOtpCode(""); }}
