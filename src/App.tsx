@@ -70,6 +70,7 @@ const AdminUmrahOrdersPage = lazy(() => import("./pages/admin/AdminUmrahOrdersPa
 const AdminComingSoonPage = lazy(() => import("./pages/admin/AdminComingSoonPage"));
 const AdminTransportVouchersPage = lazy(() => import("./pages/admin/AdminTransportVouchersPage"));
 const AdminInternalMovementsPage = lazy(() => import("./pages/admin/AdminInternalMovementsPage"));
+const AdminBilingualInvoicePage = lazy(() => import("./pages/admin/AdminBilingualInvoicePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
