@@ -10,6 +10,9 @@ import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneVal
 
 type AuthMode = "login" | "register" | "forgot" | "otp";
 
+// Toggle to re-enable phone OTP login UI later.
+const OTP_LOGIN_ENABLED = false;
+
 const Auth = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -183,8 +186,8 @@ const Auth = () => {
           </p>
         </div>
 
-        {/* OTP / Email toggle for login */}
-        {(mode === "login" || mode === "otp") && (
+        {/* OTP / Email toggle for login — OTP disabled for now. Set to true to re-enable. */}
+        {OTP_LOGIN_ENABLED && (mode === "login" || mode === "otp") && (
           <div className="flex gap-1 mb-4 bg-secondary rounded-lg p-1">
             <button
               onClick={() => { setMode("login"); setOtpSent(false); setOtpCode(""); }}
