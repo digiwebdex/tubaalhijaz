@@ -15,6 +15,9 @@ const OTP_LOGIN_ENABLED = false;
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const goAfterLogin = (fallback: string) => navigate(redirectParam || fallback);
   const { t, language } = useLanguage();
   const [mode, setMode] = useState<AuthMode>("login");
   const [loading, setLoading] = useState(false);
