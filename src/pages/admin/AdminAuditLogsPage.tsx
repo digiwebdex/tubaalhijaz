@@ -49,7 +49,21 @@ export default function AdminAuditLogsPage() {
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
+  const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [selected, setSelected] = useState<AuditLog | null>(null);
+
+  const exportCsv = () => {
+    const head = ["time","actor","role","action","severity","entity","entity_id","method","status","ip","path"];
+    const rows = filtered.map(l => [
+      l.created_at, l.actor_email||"", l.actor_role||"", l.action,
+      l.severity||"info", l.entity_type||"", l.entity_id||"",
+      l.method||"", l.status_code??"", l.ip_address||"", l.path||""
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
+    const blob = new Blob([head.join(",")+"\n"+rows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `audit-logs-${Date.now()}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const fetchLogs = async () => {
     setLoading(true);
