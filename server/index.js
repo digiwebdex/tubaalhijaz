@@ -236,6 +236,7 @@ const createCrudRoutes = (tableName, options = {}) => {
         values
       );
       if (!result.rows[0]) return res.status(404).json({ error: 'Not found' });
+      if (afterUpdate) { try { await afterUpdate(result.rows[0], req); } catch (e) { console.error(`afterUpdate ${tableName}:`, e.message); } }
       res.json(result.rows[0]);
     } catch (err) {
       res.status(500).json({ error: err.message });
