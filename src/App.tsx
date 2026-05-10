@@ -63,6 +63,9 @@ const AdminSettlementsPage = lazy(() => import("./pages/admin/AdminSettlementsPa
 const AdminBulkImportPage = lazy(() => import("./pages/admin/AdminBulkImportPage"));
 const AdminAuditLogsPage = lazy(() => import("./pages/admin/AdminAuditLogsPage"));
 const AdminSecurityPage = lazy(() => import("./pages/admin/AdminSecurityPage"));
+const AdminRolesPermissionsPage = lazy(() => import("./pages/admin/AdminRolesPermissionsPage"));
+const AdminSessionsPage = lazy(() => import("./pages/admin/AdminSessionsPage"));
+const AdminApprovalsPage = lazy(() => import("./pages/admin/AdminApprovalsPage"));
 const AdminGuidePage = lazy(() => import("./pages/admin/AdminGuidePage"));
 const AdminTransportPage = lazy(() => import("./pages/admin/AdminTransportPage"));
 const AdminCateringPage = lazy(() => import("./pages/admin/AdminCateringPage"));
@@ -170,6 +173,9 @@ const App = () => (
               <Route path="bulk-import" element={<AdminBulkImportPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="security" element={<AdminSecurityPage />} />
+              <Route path="rbac" element={<AdminRolesPermissionsPage />} />
+              <Route path="sessions" element={<AdminSessionsPage />} />
+              <Route path="approvals" element={<AdminApprovalsPage />} />
               <Route path="guide" element={<AdminGuidePage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
               <Route path="transport" element={<AdminTransportPage />} />

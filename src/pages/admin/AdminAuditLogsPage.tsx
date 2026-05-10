@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Shield, RefreshCw, Search, Eye } from "lucide-react";
+import { Shield, RefreshCw, Search, Eye, Download, AlertTriangle, AlertCircle, Info } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -27,6 +27,7 @@ interface AuditLog {
   user_agent: string | null;
   changes: any;
   metadata: any;
+  severity?: string | null;
 }
 
 const ACTION_COLORS: Record<string, string> = {
@@ -36,13 +37,33 @@ const ACTION_COLORS: Record<string, string> = {
   login: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100",
 };
 
+const SEVERITY_META: Record<string, { color: string; Icon: any }> = {
+  info: { color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200", Icon: Info },
+  warning: { color: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100", Icon: AlertTriangle },
+  critical: { color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100", Icon: AlertCircle },
+};
+
 export default function AdminAuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
+  const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [selected, setSelected] = useState<AuditLog | null>(null);
+
+  const exportCsv = () => {
+    const head = ["time","actor","role","action","severity","entity","entity_id","method","status","ip","path"];
+    const rows = filtered.map(l => [
+      l.created_at, l.actor_email||"", l.actor_role||"", l.action,
+      l.severity||"info", l.entity_type||"", l.entity_id||"",
+      l.method||"", l.status_code??"", l.ip_address||"", l.path||""
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
+    const blob = new Blob([head.join(",")+"\n"+rows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `audit-logs-${Date.now()}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -68,6 +89,7 @@ export default function AdminAuditLogsPage() {
     return logs.filter((l) => {
       if (actionFilter !== "all" && l.action !== actionFilter) return false;
       if (entityFilter !== "all" && l.entity_type !== entityFilter) return false;
+      if (severityFilter !== "all" && (l.severity || "info") !== severityFilter) return false;
       if (!q) return true;
       return (
         l.actor_email?.toLowerCase().includes(q) ||
@@ -76,7 +98,7 @@ export default function AdminAuditLogsPage() {
         l.ip_address?.toLowerCase().includes(q)
       );
     });
-  }, [logs, search, actionFilter, entityFilter]);
+  }, [logs, search, actionFilter, entityFilter, severityFilter]);
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -88,16 +110,21 @@ export default function AdminAuditLogsPage() {
             <p className="text-sm text-muted-foreground">সব admin action-এর সম্পূর্ণ ট্র্যাকিং</p>
           </div>
         </div>
-        <Button onClick={fetchLogs} disabled={loading} variant="outline" size="sm">
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={exportCsv} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" /> Export CSV
+          </Button>
+          <Button onClick={fetchLogs} disabled={loading} variant="outline" size="sm">
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
+          </Button>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Filters</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -126,6 +153,15 @@ export default function AdminAuditLogsPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <SelectTrigger><SelectValue placeholder="Severity" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Severities</SelectItem>
+              <SelectItem value="info">Info</SelectItem>
+              <SelectItem value="warning">Warning</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
@@ -141,6 +177,7 @@ export default function AdminAuditLogsPage() {
               <TableRow>
                 <TableHead>Time</TableHead>
                 <TableHead>Actor</TableHead>
+                <TableHead>Severity</TableHead>
                 <TableHead>Action</TableHead>
                 <TableHead>Entity</TableHead>
                 <TableHead>Path</TableHead>
@@ -151,10 +188,10 @@ export default function AdminAuditLogsPage() {
             </TableHeader>
             <TableBody>
               {loading && (
-                <TableRow><TableCell colSpan={8} className="text-center py-8">লোড হচ্ছে...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8">লোড হচ্ছে...</TableCell></TableRow>
               )}
               {!loading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">কোনো লগ পাওয়া যায়নি</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">কোনো লগ পাওয়া যায়নি</TableCell></TableRow>
               )}
               {filtered.map((log) => (
                 <TableRow key={log.id}>
@@ -163,6 +200,18 @@ export default function AdminAuditLogsPage() {
                   </TableCell>
                   <TableCell className="text-sm">
                     {log.actor_email || <span className="text-muted-foreground">guest</span>}
+                  </TableCell>
+                  <TableCell>
+                    {(() => {
+                      const sev = (log.severity || "info").toLowerCase();
+                      const meta = SEVERITY_META[sev] || SEVERITY_META.info;
+                      const Ico = meta.Icon;
+                      return (
+                        <Badge className={meta.color}>
+                          <Ico className="h-3 w-3 mr-1" /> {sev}
+                        </Badge>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell>
                     <Badge className={ACTION_COLORS[log.action] || "bg-muted"}>{log.action}</Badge>

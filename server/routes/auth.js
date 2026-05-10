@@ -37,10 +37,14 @@ router.post('/login', async (req, res) => {
 
     const tokens = generateTokens(user);
 
-    // Store refresh token
+    // Store refresh token + device metadata
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || null;
+    const ua = req.headers['user-agent'] || null;
+    const deviceLabel = ua ? ua.slice(0, 80) : null;
     await query(
-      'INSERT INTO sessions (user_id, refresh_token, expires_at) VALUES ($1, $2, now() + interval \'7 days\')',
-      [user.id, tokens.refreshToken]
+      `INSERT INTO sessions (user_id, refresh_token, expires_at, ip_address, user_agent, device_label, last_seen_at)
+       VALUES ($1, $2, now() + interval '7 days', $3, $4, $5, now())`,
+      [user.id, tokens.refreshToken, ip, ua, deviceLabel]
     );
 
     // Get roles

@@ -1617,3 +1617,173 @@ DROP TRIGGER IF EXISTS trg_auto_create_booking_qr ON bookings;
 CREATE TRIGGER trg_auto_create_booking_qr
 AFTER INSERT ON bookings
 FOR EACH ROW EXECUTE FUNCTION public.auto_create_booking_qr();
+
+-- ===================== RBAC EXPANSION (Phase 6 Slice C) =====================
+-- Expand role enum (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='super_admin' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'super_admin';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='operations_manager' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'operations_manager';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='visa_officer' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'visa_officer';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='transport_manager' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'transport_manager';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='catering_manager' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'catering_manager';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='finance_manager' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'finance_manager';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='hotel_coordinator' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'hotel_coordinator';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='airport_coordinator' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'airport_coordinator';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='driver' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'driver';
+  END IF;
+END $$;
+
+-- Permission catalog: defines every grantable capability
+CREATE TABLE IF NOT EXISTS permissions (
+  key TEXT PRIMARY KEY,
+  module TEXT NOT NULL,
+  label TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Role -> permission mapping (with optional scope)
+CREATE TABLE IF NOT EXISTS role_permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  role app_role NOT NULL,
+  permission_key TEXT NOT NULL REFERENCES permissions(key) ON DELETE CASCADE,
+  scope TEXT NOT NULL DEFAULT 'all', -- own | department | all
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (role, permission_key)
+);
+CREATE INDEX IF NOT EXISTS idx_role_perm_role ON role_permissions(role);
+
+-- Per-user permission overrides
+CREATE TABLE IF NOT EXISTS permission_overrides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  permission_key TEXT NOT NULL REFERENCES permissions(key) ON DELETE CASCADE,
+  granted BOOLEAN NOT NULL DEFAULT true,
+  scope TEXT NOT NULL DEFAULT 'all',
+  reason TEXT,
+  created_by UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (user_id, permission_key)
+);
+
+-- Enrich sessions table with device tracking
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS ip_address TEXT;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS user_agent TEXT;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS device_label TEXT;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMPTZ;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_sessions_user_active ON sessions(user_id, revoked_at);
+
+-- Approval workflows
+CREATE TABLE IF NOT EXISTS approval_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type TEXT NOT NULL, -- refund | payment_edit | visa_rejection | booking_cancel | commission_payout
+  entity_type TEXT,
+  entity_id TEXT,
+  payload JSONB DEFAULT '{}'::jsonb,
+  reason TEXT,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending | approved | rejected
+  requested_by UUID,
+  requested_by_email TEXT,
+  reviewed_by UUID,
+  reviewed_by_email TEXT,
+  review_note TEXT,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_status ON approval_requests(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_type ON approval_requests(type);
+
+-- Add severity to audit_logs
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS severity TEXT DEFAULT 'info';
+CREATE INDEX IF NOT EXISTS idx_audit_logs_severity ON audit_logs(severity);
+
+-- Seed permission catalog
+INSERT INTO permissions (key, module, label, description) VALUES
+  ('bookings.view',         'bookings',     'View bookings',         'Read access to bookings'),
+  ('bookings.create',       'bookings',     'Create bookings',       NULL),
+  ('bookings.edit',         'bookings',     'Edit bookings',         NULL),
+  ('bookings.delete',       'bookings',     'Delete bookings',       NULL),
+  ('bookings.approve',      'bookings',     'Approve bookings',      NULL),
+  ('bookings.export',       'bookings',     'Export bookings',       NULL),
+  ('payments.view',         'finance',      'View payments',         NULL),
+  ('payments.create',       'finance',      'Record payments',       NULL),
+  ('payments.edit',         'finance',      'Edit payments',         NULL),
+  ('payments.refund',       'finance',      'Issue refunds',         NULL),
+  ('finance.full',          'finance',      'Full financial access', 'Accounting, ledgers, P&L'),
+  ('visa.view',             'visa',         'View visa pipeline',    NULL),
+  ('visa.update',           'visa',         'Update visa status',    NULL),
+  ('visa.approve',          'visa',         'Approve / reject visa', NULL),
+  ('transport.view',        'transport',    'View transport',        NULL),
+  ('transport.assign',      'transport',    'Assign drivers',        NULL),
+  ('catering.view',         'catering',     'View catering',         NULL),
+  ('catering.manage',       'catering',     'Manage catering',       NULL),
+  ('hotel.view',            'hotel',        'View hotels',           NULL),
+  ('hotel.manage',          'hotel',        'Manage hotels',         NULL),
+  ('documents.view',        'documents',    'View documents',        NULL),
+  ('documents.review',      'documents',    'Review documents',      NULL),
+  ('messaging.send',        'messaging',    'Send messages',         NULL),
+  ('messaging.templates',   'messaging',    'Manage templates',      NULL),
+  ('qr.verify',             'security',     'Verify QR codes',       NULL),
+  ('users.manage',          'security',     'Manage users',          NULL),
+  ('roles.manage',          'security',     'Manage roles',          NULL),
+  ('audit.view',            'security',     'View audit logs',       NULL),
+  ('approvals.review',      'security',     'Review approvals',      NULL),
+  ('reports.view',          'reports',      'View reports',          NULL),
+  ('reports.export',        'reports',      'Export reports',        NULL)
+ON CONFLICT (key) DO NOTHING;
+
+-- Seed default role -> permissions
+DO $$
+DECLARE r RECORD;
+BEGIN
+  -- super_admin and admin: all permissions
+  FOR r IN SELECT key FROM permissions LOOP
+    INSERT INTO role_permissions (role, permission_key, scope) VALUES ('super_admin', r.key, 'all')
+      ON CONFLICT DO NOTHING;
+    INSERT INTO role_permissions (role, permission_key, scope) VALUES ('admin', r.key, 'all')
+      ON CONFLICT DO NOTHING;
+  END LOOP;
+END $$;
+
+INSERT INTO role_permissions (role, permission_key, scope) VALUES
+  ('operations_manager','bookings.view','all'),('operations_manager','bookings.edit','all'),
+  ('operations_manager','transport.view','all'),('operations_manager','transport.assign','all'),
+  ('operations_manager','documents.view','all'),('operations_manager','reports.view','all'),
+  ('visa_officer','visa.view','all'),('visa_officer','visa.update','all'),('visa_officer','visa.approve','all'),
+  ('visa_officer','documents.view','all'),('visa_officer','documents.review','all'),
+  ('transport_manager','transport.view','all'),('transport_manager','transport.assign','all'),
+  ('transport_manager','bookings.view','all'),
+  ('catering_manager','catering.view','all'),('catering_manager','catering.manage','all'),
+  ('finance_manager','payments.view','all'),('finance_manager','payments.create','all'),
+  ('finance_manager','payments.edit','all'),('finance_manager','payments.refund','all'),
+  ('finance_manager','finance.full','all'),('finance_manager','reports.view','all'),
+  ('finance_manager','reports.export','all'),
+  ('hotel_coordinator','hotel.view','all'),('hotel_coordinator','hotel.manage','all'),
+  ('airport_coordinator','transport.view','all'),('airport_coordinator','qr.verify','all'),
+  ('driver','transport.view','own'),('driver','qr.verify','all'),
+  ('accountant','payments.view','all'),('accountant','payments.create','all'),
+  ('accountant','finance.full','all'),('accountant','reports.view','all'),
+  ('booking','bookings.view','all'),('booking','bookings.create','all'),('booking','bookings.edit','all'),
+  ('cms','documents.view','all'),
+  ('viewer','bookings.view','all'),('viewer','reports.view','all')
+ON CONFLICT DO NOTHING;
