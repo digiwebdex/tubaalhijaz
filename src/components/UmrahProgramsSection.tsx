@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Star, Check, Crown, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import UmrahOrderDialog from "@/components/UmrahOrderDialog";
+import { useNavigate } from "react-router-dom";
+import { requireCustomerLogin } from "@/lib/bookingAuth";
 
 export type ProgramTier = "economic" | "silver" | "golden" | "platinum";
 
@@ -51,6 +53,7 @@ const COPY = {
 
 const UmrahProgramsSection = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const t = COPY[language === "bn" ? "bn" : "en"];
   const [openTier, setOpenTier] = useState<ProgramTier | null>(null);
 
@@ -128,7 +131,10 @@ const UmrahProgramsSection = () => {
                 </ul>
 
                 <button
-                  onClick={() => setOpenTier(p.key)}
+                  onClick={async () => {
+                    if (!(await requireCustomerLogin(navigate, `/?book=umrah&tier=${p.key}#programs`))) return;
+                    setOpenTier(p.key);
+                  }}
                   className={`w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                     isFeatured
                       ? "bg-gradient-gold text-primary-foreground shadow-gold hover:opacity-90"
