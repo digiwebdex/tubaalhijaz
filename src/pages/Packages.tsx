@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Filter } from "lucide-react";
@@ -10,6 +10,7 @@ import medinaImage from "@/assets/hero-medina.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 import PackageCard from "@/components/PackageCard";
+import { requireCustomerLogin } from "@/lib/bookingAuth";
 
 const fallbackImages = [heroImage, medinaImage];
 
@@ -27,6 +28,7 @@ const TYPE_LABELS: Record<string, { en: string; bn: string }> = {
 
 const Packages = () => {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   // Support URL query param ?type=air_ticket
@@ -90,10 +92,14 @@ const Packages = () => {
               {t("packagesPage.heading")} <span className="text-gradient-gold">{t("packagesPage.headingHighlight")}</span>
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto mb-8">{t("packagesPage.description")}</p>
-            <Link to="/booking"
+            <button
+              type="button"
+              onClick={async () => {
+                if (await requireCustomerLogin(navigate, "/booking")) navigate("/booking");
+              }}
               className="inline-flex items-center gap-2 bg-gradient-gold text-primary-foreground font-semibold px-8 py-3.5 rounded-lg text-sm hover:opacity-90 transition-opacity shadow-gold">
               {t("nav.bookNow")} <ArrowRight className="h-4 w-4" />
-            </Link>
+            </button>
           </motion.div>
         </div>
       </div>
@@ -149,7 +155,7 @@ const Packages = () => {
                         key={pkg.id}
                         pkg={pkg}
                         index={i}
-                        onBook={() => window.location.assign(`/packages/${pkg.id}`)}
+                        onBook={() => navigate(`/packages/${pkg.id}`)}
                       />
                     ))}
                   </div>
