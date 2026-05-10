@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bus, Car, MapPin, Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TransportOrderDialog, { TransportService } from "@/components/TransportOrderDialog";
@@ -53,6 +53,32 @@ const TransportSection = () => {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [orderOpen, setOrderOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<TransportService | null>(null);
+
+  const openService = (s: any) => {
+    setSelectedService({
+      id: s.id,
+      vehicle_type: s.vehicle_type,
+      route_from: s.route_from,
+      route_to: s.route_to,
+      price_sar: Number(s.price_sar) || 0,
+      capacity: s.capacity,
+    });
+    setOrderOpen(true);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("book") !== "transport" || orderOpen) return;
+    const serviceName = params.get("service");
+    const service = services.find((s: any) => !serviceName || s.vehicle_type === serviceName) || services[0];
+    if (!service) return;
+
+    apiClient.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return;
+      openService(service);
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.hash || ""}`);
+    });
+  }, [services, orderOpen]);
 
   const benefitsFor = (vt: string) => {
     const t = vt.toLowerCase();
@@ -208,15 +234,7 @@ const TransportSection = () => {
                               onClick={async (e) => {
                                 e.stopPropagation();
                                 if (!(await requireCustomerLogin(navigate, `/?book=transport&service=${encodeURIComponent(s.vehicle_type)}#transport`))) return;
-                                setSelectedService({
-                                  id: s.id,
-                                  vehicle_type: s.vehicle_type,
-                                  route_from: s.route_from,
-                                  route_to: s.route_to,
-                                  price_sar: Number(s.price_sar) || 0,
-                                  capacity: s.capacity,
-                                });
-                                setOrderOpen(true);
+                                openService(s);
                               }}
                             >
                               {isBn ? "বুকিং করুন" : "Book Now"}
