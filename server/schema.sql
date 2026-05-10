@@ -1208,8 +1208,38 @@ INSERT INTO notification_settings (event_key, event_label) VALUES
 ON CONFLICT DO NOTHING;
 
 -- =============================================
--- INDEXES
+-- BILINGUAL MESSAGE TEMPLATES (Phase 4)
 -- =============================================
+CREATE TABLE IF NOT EXISTS message_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_key TEXT NOT NULL,
+  channel TEXT NOT NULL,                -- 'email' | 'sms' | 'whatsapp'
+  language TEXT NOT NULL DEFAULT 'en',  -- 'en' | 'ar' | 'bn'
+  subject TEXT,
+  body TEXT NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  updated_by UUID,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (event_key, channel, language)
+);
+
+INSERT INTO message_templates (event_key, channel, language, subject, body) VALUES
+  ('booking_confirmed','email','en','Your Umrah Booking is Confirmed — {{tracking_id}}','Dear {{name}},\n\nYour Umrah booking ({{tracking_id}}) has been confirmed. Travel date: {{travel_date}}.\n\n— Tuba Al Hijaz Travel & Tourism'),
+  ('booking_confirmed','email','ar','تم تأكيد حجز العمرة — {{tracking_id}}','عزيزي {{name}}،\n\nتم تأكيد حجز العمرة الخاص بك ({{tracking_id}}). تاريخ السفر: {{travel_date}}.\n\n— طوبى الحجاز للسفر والسياحة'),
+  ('booking_confirmed','email','bn','আপনার ওমরাহ বুকিং নিশ্চিত হয়েছে — {{tracking_id}}','প্রিয় {{name}},\n\nআপনার ওমরাহ বুকিং ({{tracking_id}}) নিশ্চিত হয়েছে। ভ্রমণের তারিখ: {{travel_date}}।\n\n— তুবা আল হিজাজ ট্রাভেল ও ট্যুরিজম'),
+  ('booking_confirmed','sms','en',NULL,'Tuba Al Hijaz: Booking {{tracking_id}} confirmed. Travel: {{travel_date}}.'),
+  ('booking_confirmed','sms','ar',NULL,'طوبى الحجاز: تم تأكيد الحجز {{tracking_id}}. السفر: {{travel_date}}.'),
+  ('booking_confirmed','sms','bn',NULL,'তুবা আল হিজাজ: বুকিং {{tracking_id}} নিশ্চিত। ভ্রমণ: {{travel_date}}।'),
+  ('payment_received','email','en','Payment Received — {{amount}} BDT','Dear {{name}},\n\nWe have received your payment of {{amount}} BDT for booking {{tracking_id}}. Balance due: {{due}} BDT.\n\nThank you.'),
+  ('payment_received','email','ar','تم استلام الدفعة — {{amount}} تاكا','عزيزي {{name}}،\n\nاستلمنا دفعتك بمبلغ {{amount}} تاكا للحجز {{tracking_id}}. الرصيد المستحق: {{due}} تاكا.'),
+  ('payment_received','sms','en',NULL,'Tuba Al Hijaz: Received {{amount}} BDT for {{tracking_id}}. Due: {{due}} BDT.'),
+  ('payment_received','sms','bn',NULL,'তুবা আল হিজাজ: {{tracking_id}}-এর জন্য {{amount}} টাকা পেয়েছি। বাকি: {{due}} টাকা।'),
+  ('payment_reminder','sms','en',NULL,'Tuba Al Hijaz: Friendly reminder — {{due}} BDT due on {{due_date}} for {{tracking_id}}.'),
+  ('payment_reminder','sms','bn',NULL,'তুবা আল হিজাজ: {{tracking_id}}-এর জন্য {{due_date}} তারিখে {{due}} টাকা বাকি।'),
+  ('visa_approved','email','en','Visa Approved — {{tracking_id}}','Dear {{name}},\n\nGood news! Your Saudi visa has been approved. Please prepare for travel on {{travel_date}}.'),
+  ('visa_approved','email','ar','تمت الموافقة على التأشيرة — {{tracking_id}}','عزيزي {{name}}،\n\nنبشّرك بالموافقة على تأشيرتك السعودية. يرجى الاستعداد للسفر بتاريخ {{travel_date}}.'),
+  ('visa_approved','sms','en',NULL,'Tuba Al Hijaz: Visa APPROVED for {{name}} ({{tracking_id}}). Travel: {{travel_date}}.')
+ON CONFLICT DO NOTHING;
 CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_package_id ON bookings(package_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_moallem_id ON bookings(moallem_id);
