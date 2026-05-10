@@ -1,89 +1,56 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { apiClient } from "@/lib/apiClient";
-import { CheckCircle, XCircle, FileText, Loader2 } from "lucide-react";
-import { generateVerificationId } from "@/lib/pdfQrCode";
+import { CheckCircle2, XCircle, ShieldCheck, Loader2, FileText, Calendar, Users, Package as PackageIcon } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { formatBDT } from "@/lib/utils";
+
+interface VerifiedBooking {
+  id: string;
+  tracking_id: string;
+  status: string;
+  guest_name: string | null;
+  num_travelers: number;
+  total_amount: number;
+  paid_amount: number;
+  due_amount: number | null;
+  created_at: string;
+  travel_date: string | null;
+  package_name: string | null;
+  package_type: string | null;
+}
 
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-interface VerifiedBooking {
-  tracking_id: string;
-  total_amount: number;
-  paid_amount: number;
-  due_amount: number | null;
-  status: string;
-  created_at: string;
-  num_travelers: number;
-  guest_name: string | null;
-  packages: { name: string; type?: string } | null;
-}
-
 export default function VerifyInvoice() {
-  const { invoiceNumber } = useParams();
+  const { invoiceNumber, trackingId } = useParams() as { invoiceNumber?: string; trackingId?: string };
   const [searchParams] = useSearchParams();
-  const trackingFromQuery = searchParams.get("id");
+  const queryId = searchParams.get("id");
   const { t } = useLanguage();
 
   const [booking, setBooking] = useState<VerifiedBooking | null>(null);
   const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [scanResult, setScanResult] = useState<"verified" | "invalid" | "revoked" | "expired" | null>(null);
 
   useEffect(() => {
-    const verify = async () => {
-      setLoading(true);
-      setNotFound(false);
+    const tid = (trackingId || queryId || invoiceNumber || "").trim();
+    if (!tid) {
+      setScanResult("invalid");
+      setLoading(false);
+      return;
+    }
+    const apiBase = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+    fetch(`${apiBase}/verify/${encodeURIComponent(tid)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setScanResult(data?.scan_result || "invalid");
+        if (data?.verified && data?.booking) setBooking(data.booking);
+      })
+      .catch(() => setScanResult("invalid"))
+      .finally(() => setLoading(false));
+  }, [invoiceNumber, queryId, trackingId]);
 
-      const trackingId = trackingFromQuery || "";
-
-      if (!trackingId && !invoiceNumber) {
-        setNotFound(true);
-        setLoading(false);
-        return;
-      }
-
-      if (trackingId) {
-        try {
-          const { data, error } = await apiClient.functions.invoke("verify-invoice", {
-            body: { tracking_id: trackingId },
-          });
-
-          if (error || !data?.booking) {
-            setNotFound(true);
-          } else {
-            setBooking(data.booking as VerifiedBooking);
-          }
-        } catch {
-          setNotFound(true);
-        }
-        setLoading(false);
-        return;
-      }
-
-      if (invoiceNumber) {
-        try {
-          const { data } = await apiClient.functions.invoke("verify-invoice", {
-            body: { tracking_id: invoiceNumber },
-          });
-
-          if (data?.booking) {
-            setBooking(data.booking as VerifiedBooking);
-            setLoading(false);
-            return;
-          }
-        } catch {
-          // ignore
-        }
-        setNotFound(true);
-        setLoading(false);
-      }
-    };
-
-    verify();
-  }, [invoiceNumber, trackingFromQuery]);
-
+  const isValid = scanResult === "verified" && booking;
   const paymentStatus = booking
     ? Number(booking.due_amount || 0) <= 0
       ? "PAID"
@@ -92,80 +59,101 @@ export default function VerifyInvoice() {
       : "DUE"
     : "";
 
-  const statusColor =
+  const statusBadge =
     paymentStatus === "PAID"
-      ? "text-green-600"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
       : paymentStatus === "PARTIAL"
-      ? "text-orange-500"
-      : "text-red-500";
+      ? "bg-amber-50 text-amber-700 border-amber-200"
+      : "bg-red-50 text-red-700 border-red-200";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen bg-gradient-to-br from-[#0b1729] via-[#1a2238] to-[#0b1729] p-4 flex items-center justify-center">
+      <div className="w-full max-w-xl">
+        {/* Header brand bar */}
+        <div className="mb-6 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-amber-300/30 backdrop-blur">
+            <ShieldCheck className="h-4 w-4 text-amber-300" />
+            <span className="text-amber-100 text-xs tracking-widest uppercase font-semibold">Document Verification</span>
+          </div>
+        </div>
+
         {loading && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-gray-500">{t("verify.verifying")}</p>
+          <div className="rounded-3xl bg-white shadow-2xl p-12 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-amber-500 mx-auto mb-4" />
+            <p className="text-slate-500">{t("verify.verifying") || "Verifying..."}</p>
           </div>
         )}
 
-        {!loading && notFound && (
-          <div className="bg-white rounded-2xl shadow-lg p-10 text-center">
-            <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t("verify.notFoundTitle")}</h1>
-            <p className="text-gray-500">{t("verify.notFoundDesc")}</p>
-            {invoiceNumber && (
-              <p className="text-sm text-gray-400 mt-4 font-mono">{invoiceNumber}</p>
-            )}
+        {!loading && !isValid && (
+          <div className="rounded-3xl bg-white shadow-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-red-600 to-red-700 p-8 text-center">
+              <XCircle className="h-20 w-20 text-white mx-auto mb-3" />
+              <h1 className="text-2xl font-bold text-white tracking-wide">INVALID DOCUMENT</h1>
+              <p className="text-red-100 text-sm mt-2 capitalize">
+                {scanResult === "revoked" && "This document has been revoked"}
+                {scanResult === "expired" && "This document has expired"}
+                {(scanResult === "invalid" || !scanResult) && "Document not found or tampered"}
+              </p>
+            </div>
+            <div className="p-6 text-center">
+              <p className="text-sm text-slate-500">
+                If you believe this is an error, please contact our support team.
+              </p>
+            </div>
           </div>
         )}
 
-        {!loading && booking && (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="bg-green-50 border-b border-green-200 p-6 text-center">
-              <CheckCircle className="h-14 w-14 text-green-600 mx-auto mb-3" />
-              <h1 className="text-xl font-bold text-green-800">{t("verify.verified")}</h1>
-              <p className="text-sm text-green-600 mt-1">{t("verify.verifiedDesc")}</p>
+        {!loading && isValid && booking && (
+          <div className="rounded-3xl bg-white shadow-2xl overflow-hidden border border-amber-200/50">
+            {/* Verified header — gold gradient */}
+            <div className="relative bg-gradient-to-r from-[#b8860b] via-[#d4af37] to-[#b8860b] p-8 text-center">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top,_white,_transparent_70%)]" />
+              <CheckCircle2 className="h-20 w-20 text-white mx-auto mb-3 drop-shadow-lg" />
+              <h1 className="text-2xl font-bold text-white tracking-widest">VERIFIED</h1>
+              <p className="text-amber-50 text-sm mt-2">Authentic document issued by Tuba Al Hijaz</p>
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-gray-400" />
-                <span className="text-sm font-semibold text-gray-700">{t("verify.details")}</span>
+            {/* Customer block */}
+            <div className="p-6 border-b border-slate-100">
+              <p className="text-xs uppercase tracking-wider text-slate-400 mb-1">Pilgrim Name</p>
+              <h2 className="text-2xl font-bold text-slate-900">{booking.guest_name || "—"}</h2>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="font-mono text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-md">
+                  {booking.tracking_id}
+                </span>
+                <span className={`text-xs font-bold px-3 py-1 rounded-md border ${statusBadge}`}>
+                  {paymentStatus}
+                </span>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <Detail label={t("verify.invoiceNo")} value={generateVerificationId(booking.tracking_id)} />
-                <Detail label={t("verify.bookingId")} value={booking.tracking_id} />
-                <Detail label={t("verify.customer")} value={booking.guest_name || "N/A"} />
-                <Detail label={t("verify.package")} value={booking.packages?.name || "N/A"} />
-                <Detail label={t("verify.packageType")} value={booking.packages?.type || "N/A"} />
-                <Detail label={t("verify.travelers")} value={String(booking.num_travelers)} />
-                <Detail label={t("verify.issueDate")} value={fmtDate(booking.created_at)} />
-                <Detail
-                  label={t("verify.status")}
-                  value={paymentStatus}
-                  valueClass={`font-bold ${statusColor}`}
-                />
-              </div>
+            {/* Detail grid */}
+            <div className="p-6 grid grid-cols-2 gap-5">
+              <Field icon={<PackageIcon className="h-4 w-4" />} label="Package" value={booking.package_name || "—"} />
+              <Field icon={<FileText className="h-4 w-4" />} label="Type" value={booking.package_type || "—"} />
+              <Field icon={<Users className="h-4 w-4" />} label="Travelers" value={String(booking.num_travelers)} />
+              <Field icon={<Calendar className="h-4 w-4" />} label="Travel Date" value={fmtDate(booking.travel_date)} />
+              <Field icon={<Calendar className="h-4 w-4" />} label="Issued" value={fmtDate(booking.created_at)} />
+              <Field icon={<ShieldCheck className="h-4 w-4" />} label="Booking Status" value={booking.status} />
+            </div>
 
-              <div className="border-t border-gray-100 pt-4 mt-4 space-y-2">
-                <FinRow label={t("verify.totalAmount")} value={formatBDT(booking.total_amount)} bold />
-                <FinRow label={t("verify.paidAmount")} value={formatBDT(booking.paid_amount)} className="text-green-600" />
-                <FinRow
-                  label={t("verify.dueAmount")}
+            {/* Financial summary */}
+            <div className="px-6 pb-6">
+              <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 space-y-2">
+                <Row label="Total Amount" value={formatBDT(booking.total_amount)} bold />
+                <Row label="Paid" value={formatBDT(booking.paid_amount)} className="text-emerald-700" />
+                <Row
+                  label="Due"
                   value={formatBDT(Math.max(0, Number(booking.due_amount || 0)))}
-                  className={Number(booking.due_amount || 0) > 0 ? "text-red-500" : "text-green-600"}
+                  className={Number(booking.due_amount || 0) > 0 ? "text-red-600" : "text-emerald-700"}
                   bold
                 />
               </div>
             </div>
 
-            <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 text-center">
-              <p className="text-xs text-gray-400">{t("verify.companyFooter")}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                +880 1711-925400 | info@triptastic.com.bd
-              </p>
+            <div className="bg-slate-50 border-t px-6 py-4 text-center">
+              <p className="text-xs text-slate-500 font-semibold">Tuba Al Hijaz · Saudi Umrah Operations</p>
+              <p className="text-xs text-slate-400 mt-1">+880 1711-925400 · info@tubaalhijaz.com</p>
             </div>
           </div>
         )}
@@ -174,20 +162,23 @@ export default function VerifyInvoice() {
   );
 }
 
-function Detail({ label, value, valueClass = "" }: { label: string; value: string; valueClass?: string }) {
+function Field({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className={`font-medium text-gray-800 ${valueClass}`}>{value}</p>
+      <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+        {icon}
+        <span className="text-[11px] uppercase tracking-wider font-semibold">{label}</span>
+      </div>
+      <p className="text-sm font-semibold text-slate-800">{value}</p>
     </div>
   );
 }
 
-function FinRow({ label, value, bold, className = "" }: { label: string; value: string; bold?: boolean; className?: string }) {
+function Row({ label, value, bold, className = "" }: { label: string; value: string; bold?: boolean; className?: string }) {
   return (
-    <div className="flex justify-between text-sm">
-      <span className={`text-gray-500 ${bold ? "font-semibold" : ""}`}>{label}</span>
-      <span className={`${bold ? "font-bold" : "font-medium"} ${className}`}>{value}</span>
+    <div className="flex justify-between items-center text-sm">
+      <span className={`text-slate-600 ${bold ? "font-semibold" : ""}`}>{label}</span>
+      <span className={`${bold ? "font-bold text-base" : "font-medium"} ${className}`}>{value}</span>
     </div>
   );
 }

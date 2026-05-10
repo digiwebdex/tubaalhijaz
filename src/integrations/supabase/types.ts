@@ -210,6 +210,10 @@ export type Database = {
           file_size: number | null
           id: string
           user_id: string
+          verification_notes: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           booking_id: string
@@ -220,6 +224,10 @@ export type Database = {
           file_size?: number | null
           id?: string
           user_id: string
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           booking_id?: string
@@ -230,6 +238,10 @@ export type Database = {
           file_size?: number | null
           id?: string
           user_id?: string
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -1840,6 +1852,101 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      public_tracking_logs: {
+        Row: {
+          city: string | null
+          country: string | null
+          document_type: string | null
+          id: string
+          ip_address: string | null
+          qr_id: string | null
+          scan_result: string
+          scanned_at: string
+          tracking_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          document_type?: string | null
+          id?: string
+          ip_address?: string | null
+          qr_id?: string | null
+          scan_result?: string
+          scanned_at?: string
+          tracking_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          document_type?: string | null
+          id?: string
+          ip_address?: string | null
+          qr_id?: string | null
+          scan_result?: string
+          scanned_at?: string
+          tracking_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_tracking_logs_qr_id_fkey"
+            columns: ["qr_id"]
+            isOneToOne: false
+            referencedRelation: "qr_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qr_verifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          document_type: string
+          expires_at: string | null
+          id: string
+          last_scanned_at: string | null
+          metadata: Json
+          related_id: string
+          related_type: string
+          scan_count: number
+          status: string
+          token: string
+          tracking_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          document_type: string
+          expires_at?: string | null
+          id?: string
+          last_scanned_at?: string | null
+          metadata?: Json
+          related_id: string
+          related_type: string
+          scan_count?: number
+          status?: string
+          token: string
+          tracking_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          document_type?: string
+          expires_at?: string | null
+          id?: string
+          last_scanned_at?: string | null
+          metadata?: Json
+          related_id?: string
+          related_type?: string
+          scan_count?: number
+          status?: string
+          token?: string
+          tracking_id?: string | null
         }
         Relationships: []
       }
