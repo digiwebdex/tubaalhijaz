@@ -31,7 +31,7 @@ export default function AdminBilingualInvoicePage() {
         customer_address: customer?.address || b.guest_address,
         passport_no: b.guest_passport,
         package_name: pkg?.title || "Umrah Package",
-        package_name_ar: pkg?.title_ar || "باقة العمرة",
+        package_name_ar: "باقة العمرة",
         num_travelers: b.num_travelers,
         subtotal: Number(b.total_amount) + Number(b.discount || 0),
         discount: Number(b.discount || 0),
