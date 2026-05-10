@@ -16,7 +16,7 @@ export default function AdminBilingualInvoicePage() {
       if (!id) return;
       const { data: b } = await apiClient.from("bookings").select("*").eq("id", id).single();
       if (!b) { setLoading(false); return; }
-      const { data: pkg } = await apiClient.from("packages").select("title, title_ar, price").eq("id", b.package_id).single();
+      const { data: pkg } = await apiClient.from("packages").select("title, price").eq("id", b.package_id).single();
       let customer: any = null;
       if (b.user_id && b.user_id !== "00000000-0000-0000-0000-000000000000") {
         const { data: c } = await apiClient.from("profiles").select("full_name, phone, email, address").eq("id", b.user_id).single();
