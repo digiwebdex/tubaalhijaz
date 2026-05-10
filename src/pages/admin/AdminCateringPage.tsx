@@ -64,8 +64,8 @@ export default function AdminCateringPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Catering</h1>
-          <p className="text-sm text-muted-foreground">Manage catering packages and customer orders</p>
+          <h1 className="font-heading text-2xl font-bold text-[#0F4C3A]">Catering <span className="text-base font-normal text-[#C9A96E]" dir="rtl" style={{ fontFamily: "'Noto Naskh Arabic',serif" }}>· خدمات التموين</span></h1>
+          <p className="text-sm text-muted-foreground">Manage Iftar, Suhoor, Lunch & Dinner packages for Makkah & Madinah groups.</p>
         </div>
         {tab === "packages" && !isViewer && (
           <button onClick={() => { setShowForm(true); setEditingId(null); setForm(EMPTY); }} className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm flex items-center gap-2">
