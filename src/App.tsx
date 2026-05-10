@@ -67,6 +67,7 @@ const AdminGuidePage = lazy(() => import("./pages/admin/AdminGuidePage"));
 const AdminTransportPage = lazy(() => import("./pages/admin/AdminTransportPage"));
 const AdminCateringPage = lazy(() => import("./pages/admin/AdminCateringPage"));
 const AdminUmrahOrdersPage = lazy(() => import("./pages/admin/AdminUmrahOrdersPage"));
+const AdminComingSoonPage = lazy(() => import("./pages/admin/AdminComingSoonPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -153,6 +154,13 @@ const App = () => (
               <Route path="transport" element={<AdminTransportPage />} />
               <Route path="catering" element={<AdminCateringPage />} />
               <Route path="umrah-orders" element={<AdminUmrahOrdersPage />} />
+              <Route path="transport-vouchers" element={<AdminComingSoonPage title="Transport Vouchers" description="Bilingual (EN/AR) movement vouchers with QR code, agent details, hotel info, and full operational workflow. Phase 2-এ চালু হবে।" />} />
+              <Route path="movements" element={<AdminComingSoonPage title="Internal Movements" description="Operational movement schedule: Jeddah → Makkah → Madinah → Jeddah. Driver assignment, vehicle tracking, real-time status." />} />
+              <Route path="pilgrims" element={<AdminComingSoonPage title="Pilgrim Management" description="Centralized pilgrim profiles: passport, visa, photo, booking history, payment history, travel history." />} />
+              <Route path="flights" element={<AdminComingSoonPage title="Flights" description="Arrival/departure flight schedule, airline coordination, airport transfer linking." />} />
+              <Route path="drivers-vehicles" element={<AdminComingSoonPage title="Drivers & Vehicles" description="Bus & vehicle fleet, driver roster, capacity, availability tracking." />} />
+              <Route path="agents" element={<AdminComingSoonPage title="Agents" description="Travel agents, commission tracking, due management, total bookings." />} />
+              <Route path="invoices" element={<AdminComingSoonPage title="Invoices" description="Bilingual SAR/BDT invoices with QR verification, PDF download, WhatsApp & email delivery." />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
