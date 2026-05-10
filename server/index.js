@@ -619,6 +619,7 @@ app.use('/api/qr-verifications', createCrudRoutes('qr_verifications', { adminOnl
 app.use('/api/document-reviews', require('./routes/documentReviews'));
 app.use('/api/public-tracking-logs', createCrudRoutes('public_tracking_logs', { adminOnly: true, orderBy: 'scanned_at DESC' }));
 app.use('/api/verify', require('./routes/verify'));
+app.use('/api/ops', require('./routes/ops'));
 
 // ==============================================
 // BACKUP / RESTORE ROUTES

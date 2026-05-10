@@ -143,6 +143,72 @@ export type Database = {
         }
         Relationships: []
       }
+      airport_arrivals: {
+        Row: {
+          actual_at: string | null
+          airline: string | null
+          airport_code: string
+          airport_name: string | null
+          assigned_driver_id: string | null
+          assigned_driver_name: string | null
+          booking_id: string | null
+          created_at: string
+          created_by: string | null
+          direction: string
+          flight_number: string
+          id: string
+          notes: string | null
+          pickup_status: string
+          pilgrim_count: number
+          scheduled_at: string
+          updated_at: string
+          vehicle_label: string | null
+          voucher_id: string | null
+        }
+        Insert: {
+          actual_at?: string | null
+          airline?: string | null
+          airport_code: string
+          airport_name?: string | null
+          assigned_driver_id?: string | null
+          assigned_driver_name?: string | null
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          flight_number: string
+          id?: string
+          notes?: string | null
+          pickup_status?: string
+          pilgrim_count?: number
+          scheduled_at: string
+          updated_at?: string
+          vehicle_label?: string | null
+          voucher_id?: string | null
+        }
+        Update: {
+          actual_at?: string | null
+          airline?: string | null
+          airport_code?: string
+          airport_name?: string | null
+          assigned_driver_id?: string | null
+          assigned_driver_name?: string | null
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          flight_number?: string
+          id?: string
+          notes?: string | null
+          pickup_status?: string
+          pilgrim_count?: number
+          scheduled_at?: string
+          updated_at?: string
+          vehicle_label?: string | null
+          voucher_id?: string | null
+        }
+        Relationships: []
+      }
       approval_requests: {
         Row: {
           created_at: string
@@ -1171,6 +1237,57 @@ export type Database = {
         }
         Relationships: []
       }
+      live_vehicle_tracking: {
+        Row: {
+          created_at: string
+          driver_name: string | null
+          driver_user_id: string | null
+          eta_minutes: number | null
+          heading: number | null
+          id: string
+          lat: number
+          lng: number
+          movement_id: string | null
+          recorded_at: string
+          speed_kmh: number | null
+          status: string
+          vehicle_label: string | null
+          voucher_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          driver_name?: string | null
+          driver_user_id?: string | null
+          eta_minutes?: number | null
+          heading?: number | null
+          id?: string
+          lat: number
+          lng: number
+          movement_id?: string | null
+          recorded_at?: string
+          speed_kmh?: number | null
+          status?: string
+          vehicle_label?: string | null
+          voucher_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          driver_name?: string | null
+          driver_user_id?: string | null
+          eta_minutes?: number | null
+          heading?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          movement_id?: string | null
+          recorded_at?: string
+          speed_kmh?: number | null
+          status?: string
+          vehicle_label?: string | null
+          voucher_id?: string | null
+        }
+        Relationships: []
+      }
       message_logs: {
         Row: {
           body: string | null
@@ -1772,6 +1889,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ops_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          body: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          related_id: string | null
+          related_type: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          related_id?: string | null
+          related_type?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          related_id?: string | null
+          related_type?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
       }
       otp_codes: {
         Row: {

@@ -1787,3 +1787,73 @@ INSERT INTO role_permissions (role, permission_key, scope) VALUES
   ('cms','documents.view','all'),
   ('viewer','bookings.view','all'),('viewer','reports.view','all')
 ON CONFLICT DO NOTHING;
+
+-- =============================================================
+-- LIVE OPERATIONS INTELLIGENCE (Slice C)
+-- =============================================================
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel='airport_coordinator' AND enumtypid='app_role'::regtype) THEN
+    ALTER TYPE app_role ADD VALUE 'airport_coordinator';
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS live_vehicle_tracking (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  movement_id UUID,
+  voucher_id UUID,
+  driver_user_id UUID,
+  driver_name TEXT,
+  vehicle_label TEXT,
+  lat NUMERIC(10,6) NOT NULL,
+  lng NUMERIC(10,6) NOT NULL,
+  speed_kmh NUMERIC(6,2),
+  heading NUMERIC(5,2),
+  status TEXT NOT NULL DEFAULT 'on_route',
+  eta_minutes INTEGER,
+  recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_lvt_movement ON live_vehicle_tracking(movement_id);
+CREATE INDEX IF NOT EXISTS idx_lvt_driver ON live_vehicle_tracking(driver_user_id);
+CREATE INDEX IF NOT EXISTS idx_lvt_recorded ON live_vehicle_tracking(recorded_at DESC);
+
+CREATE TABLE IF NOT EXISTS ops_alerts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  alert_type TEXT NOT NULL,
+  severity TEXT NOT NULL DEFAULT 'warning',
+  title TEXT NOT NULL,
+  body TEXT,
+  related_type TEXT,
+  related_id UUID,
+  status TEXT NOT NULL DEFAULT 'open',
+  acknowledged_by UUID,
+  acknowledged_at TIMESTAMPTZ,
+  resolved_at TIMESTAMPTZ,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ops_alerts_status ON ops_alerts(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS airport_arrivals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id UUID,
+  voucher_id UUID,
+  direction TEXT NOT NULL DEFAULT 'arrival',
+  airport_code TEXT NOT NULL,
+  airport_name TEXT,
+  airline TEXT,
+  flight_number TEXT NOT NULL,
+  scheduled_at TIMESTAMPTZ NOT NULL,
+  actual_at TIMESTAMPTZ,
+  pilgrim_count INTEGER NOT NULL DEFAULT 1,
+  assigned_driver_id UUID,
+  assigned_driver_name TEXT,
+  vehicle_label TEXT,
+  pickup_status TEXT NOT NULL DEFAULT 'scheduled',
+  notes TEXT,
+  created_by UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_airport_arrivals_sched ON airport_arrivals(scheduled_at DESC);
+CREATE INDEX IF NOT EXISTS idx_airport_arrivals_status ON airport_arrivals(pickup_status);

@@ -81,6 +81,9 @@ const AdminMessagingSettingsPage = lazy(() => import("./pages/admin/AdminMessagi
 const AdminMessageLogsPage = lazy(() => import("./pages/admin/AdminMessageLogsPage"));
 const AdminQrVerificationsPage = lazy(() => import("./pages/admin/AdminQrVerificationsPage"));
 const AdminDocumentReviewsPage = lazy(() => import("./pages/admin/AdminDocumentReviewsPage"));
+const AdminLiveOperationsMapPage = lazy(() => import("./pages/admin/AdminLiveOperationsMapPage"));
+const AdminAirportCoordinatorPage = lazy(() => import("./pages/admin/AdminAirportCoordinatorPage"));
+const AdminOpsAlertsPage = lazy(() => import("./pages/admin/AdminOpsAlertsPage"));
 
 // Agent Portal
 const AgentLayout = lazy(() => import("./components/agent/AgentLayout"));
@@ -91,6 +94,13 @@ const AgentGroupsPage = lazy(() => import("./pages/agent/AgentGroupsPage"));
 const AgentCommissionsPage = lazy(() => import("./pages/agent/AgentCommissionsPage"));
 const AgentDocumentsPage = lazy(() => import("./pages/agent/AgentDocumentsPage"));
 const AgentOperationsPage = lazy(() => import("./pages/agent/AgentOperationsPage"));
+
+// Driver Portal (mobile field mode)
+const DriverLayout = lazy(() => import("./components/driver/DriverLayout"));
+const DriverTripsPage = lazy(() => import("./pages/driver/DriverTripsPage"));
+const DriverScanPage = lazy(() => import("./pages/driver/DriverScanPage"));
+const DriverAlertsPage = lazy(() => import("./pages/driver/DriverAlertsPage"));
+const DriverProfilePage = lazy(() => import("./pages/driver/DriverProfilePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -196,6 +206,9 @@ const App = () => (
               <Route path="message-logs" element={<AdminMessageLogsPage />} />
               <Route path="qr-verifications" element={<AdminQrVerificationsPage />} />
               <Route path="document-reviews" element={<AdminDocumentReviewsPage />} />
+              <Route path="live-map" element={<AdminLiveOperationsMapPage />} />
+              <Route path="airport-coordinator" element={<AdminAirportCoordinatorPage />} />
+              <Route path="ops-alerts" element={<AdminOpsAlertsPage />} />
             </Route>
 
             <Route path="/agent" element={<AgentLayout />}>
@@ -206,6 +219,13 @@ const App = () => (
               <Route path="commissions" element={<AgentCommissionsPage />} />
               <Route path="documents" element={<AgentDocumentsPage />} />
               <Route path="operations" element={<AgentOperationsPage />} />
+            </Route>
+
+            <Route path="/driver" element={<DriverLayout />}>
+              <Route index element={<DriverTripsPage />} />
+              <Route path="scan" element={<DriverScanPage />} />
+              <Route path="alerts" element={<DriverAlertsPage />} />
+              <Route path="profile" element={<DriverProfilePage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
