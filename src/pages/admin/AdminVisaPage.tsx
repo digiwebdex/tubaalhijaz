@@ -89,8 +89,8 @@ export default function AdminVisaPage() {
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Visa Processing</h1>
-          <p className="text-sm text-muted-foreground">Track visa applications, status & dues.</p>
+          <h1 className="text-2xl font-bold text-[#0F4C3A]">Visa Processing <span className="text-base font-normal text-[#C9A96E]" dir="rtl" style={{ fontFamily: "'Noto Naskh Arabic',serif" }}>· معالجة التأشيرات</span></h1>
+          <p className="text-sm text-muted-foreground">Track visa applications across the workflow: Pending → Processing → Approved.</p>
         </div>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setEditing(null); setForm(emptyForm); }}}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" /> New Visa</Button></DialogTrigger>
