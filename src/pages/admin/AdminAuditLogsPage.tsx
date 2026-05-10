@@ -153,6 +153,15 @@ export default function AdminAuditLogsPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <SelectTrigger><SelectValue placeholder="Severity" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Severities</SelectItem>
+              <SelectItem value="info">Info</SelectItem>
+              <SelectItem value="warning">Warning</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
