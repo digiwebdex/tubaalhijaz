@@ -77,6 +77,7 @@ const AdminGroupManifestPage = lazy(() => import("./pages/admin/AdminGroupManife
 const AdminMessagingSettingsPage = lazy(() => import("./pages/admin/AdminMessagingSettingsPage"));
 const AdminMessageLogsPage = lazy(() => import("./pages/admin/AdminMessageLogsPage"));
 const AdminQrVerificationsPage = lazy(() => import("./pages/admin/AdminQrVerificationsPage"));
+const AdminDocumentReviewsPage = lazy(() => import("./pages/admin/AdminDocumentReviewsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -178,6 +179,7 @@ const App = () => (
               <Route path="messaging-settings" element={<AdminMessagingSettingsPage />} />
               <Route path="message-logs" element={<AdminMessageLogsPage />} />
               <Route path="qr-verifications" element={<AdminQrVerificationsPage />} />
+              <Route path="document-reviews" element={<AdminDocumentReviewsPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

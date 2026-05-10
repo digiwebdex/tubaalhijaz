@@ -67,6 +67,7 @@ const systemMenu = [
   { title: "Messaging Settings",   url: "/admin/messaging-settings",    icon: Settings,        roles: ["admin"] },
   { title: "Message Logs",         url: "/admin/message-logs",          icon: BarChart3,       roles: ["admin"] },
   { title: "QR Verifications",     url: "/admin/qr-verifications",      icon: ShieldCheck,     roles: ["admin"] },
+  { title: "Document Reviews",     url: "/admin/document-reviews",      icon: FileCheck,       roles: ["admin", "booking"] },
   { title: "Payment Methods",      url: "/admin/payment-methods",       icon: CreditCard,      roles: ["admin"] },
   { title: "CMS",                  url: "/admin/cms",                   icon: Pencil,          roles: ["admin", "cms"] },
   { title: "SEO",                  url: "/admin/seo",                   icon: Search,          roles: ["admin"] },
