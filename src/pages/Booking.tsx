@@ -163,7 +163,13 @@ const Booking = () => {
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await apiClient.auth.getSession();
-      if (session) {
+      if (!session) {
+        toast.info("Please login or create an account to book");
+        const redirectTo = `/booking${packageId ? `?package=${packageId}` : ""}`;
+        navigate(`/auth?redirect=${encodeURIComponent(redirectTo)}`);
+        return;
+      }
+      {
         setUser(session.user);
         const { data: profile } = await apiClient
           .from("profiles")
