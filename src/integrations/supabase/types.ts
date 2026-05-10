@@ -101,6 +101,48 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_commissions: {
+        Row: {
+          base_amount: number
+          booking_id: string | null
+          commission_amount: number
+          commission_pct: number
+          created_at: string
+          id: string
+          notes: string | null
+          paid_amount: number
+          status: string
+          supplier_agent_id: string
+          updated_at: string
+        }
+        Insert: {
+          base_amount?: number
+          booking_id?: string | null
+          commission_amount?: number
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          status?: string
+          supplier_agent_id: string
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number
+          booking_id?: string | null
+          commission_amount?: number
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          status?: string
+          supplier_agent_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -672,6 +714,45 @@ export type Database = {
           note?: string | null
           section_key?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      commission_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          payment_method: string | null
+          payout_date: string
+          recorded_by: string | null
+          reference: string | null
+          supplier_agent_id: string
+          wallet_account_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payout_date?: string
+          recorded_by?: string | null
+          reference?: string | null
+          supplier_agent_id: string
+          wallet_account_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payout_date?: string
+          recorded_by?: string | null
+          reference?: string | null
+          supplier_agent_id?: string
+          wallet_account_id?: string | null
         }
         Relationships: []
       }
@@ -2261,11 +2342,14 @@ export type Database = {
         Row: {
           address: string | null
           agent_name: string
+          agent_user_id: string | null
+          commission_pct: number
           company_name: string | null
           contract_date: string | null
           contracted_amount: number
           contracted_hajji: number
           created_at: string
+          email: string | null
           id: string
           notes: string | null
           phone: string | null
@@ -2275,11 +2359,14 @@ export type Database = {
         Insert: {
           address?: string | null
           agent_name: string
+          agent_user_id?: string | null
+          commission_pct?: number
           company_name?: string | null
           contract_date?: string | null
           contracted_amount?: number
           contracted_hajji?: number
           created_at?: string
+          email?: string | null
           id?: string
           notes?: string | null
           phone?: string | null
@@ -2289,11 +2376,14 @@ export type Database = {
         Update: {
           address?: string | null
           agent_name?: string
+          agent_user_id?: string | null
+          commission_pct?: number
           company_name?: string | null
           contract_date?: string | null
           contracted_amount?: number
           contracted_hajji?: number
           created_at?: string
+          email?: string | null
           id?: string
           notes?: string | null
           phone?: string | null
@@ -3317,6 +3407,7 @@ export type Database = {
         | "accountant"
         | "booking"
         | "cms"
+        | "agent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3453,6 +3544,7 @@ export const Constants = {
         "accountant",
         "booking",
         "cms",
+        "agent",
       ],
     },
   },
