@@ -82,6 +82,9 @@ app.use('/api', auditMiddleware);
 
 app.use('/api/auth', authRoutes);
 
+// RBAC + sessions + approvals + filtered audit logs
+app.use('/api/rbac', require('./routes/rbac'));
+
 // =============================================
 // GENERIC CRUD HELPER
 // =============================================
