@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 
 // PDF Company Configuration - v2
 export interface PdfCompanyConfig {
@@ -34,7 +34,7 @@ export async function getPdfCompanyConfig(): Promise<PdfCompanyConfig> {
   }
 
   try {
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("company_settings")
       .select("setting_value")
       .eq("setting_key", "pdf_company")

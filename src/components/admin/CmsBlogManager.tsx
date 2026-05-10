@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, X, Edit2, Trash2, Save, Eye, EyeOff } from "lucide-react";
 
@@ -17,7 +17,7 @@ export default function CmsBlogManager() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchPosts = () =>
-    supabase.from("blog_posts" as any).select("*").order("created_at", { ascending: false })
+    apiClient.from("blog_posts" as any).select("*").order("created_at", { ascending: false })
       .then(({ data }) => setPosts((data as any[]) || []));
 
   useEffect(() => { fetchPosts(); }, []);
@@ -27,8 +27,8 @@ export default function CmsBlogManager() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     const slug = form.slug || slugify(form.title);
-    const { data: { session } } = await supabase.auth.getSession();
-    const { error } = await supabase.from("blog_posts" as any).insert({
+    const { data: { session } } = await apiClient.auth.getSession();
+    const { error } = await apiClient.from("blog_posts" as any).insert({
       title: form.title,
       slug,
       content: form.content,
@@ -61,7 +61,7 @@ export default function CmsBlogManager() {
 
   const saveEdit = async () => {
     if (!editingId) return;
-    const { error } = await supabase.from("blog_posts" as any).update({
+    const { error } = await apiClient.from("blog_posts" as any).update({
       title: form.title,
       slug: form.slug,
       content: form.content,
@@ -80,7 +80,7 @@ export default function CmsBlogManager() {
 
   const togglePublish = async (p: any) => {
     const newStatus = p.status === "published" ? "draft" : "published";
-    const { error } = await supabase.from("blog_posts" as any).update({
+    const { error } = await apiClient.from("blog_posts" as any).update({
       status: newStatus,
       published_at: newStatus === "published" ? new Date().toISOString() : null,
     } as any).eq("id", p.id);
@@ -91,7 +91,7 @@ export default function CmsBlogManager() {
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("blog_posts" as any).delete().eq("id", deleteId);
+    const { error } = await apiClient.from("blog_posts" as any).delete().eq("id", deleteId);
     if (error) { toast.error(error.message); return; }
     toast.success("Blog post deleted");
     setDeleteId(null);

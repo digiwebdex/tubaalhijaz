@@ -3,7 +3,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, ArrowLeft, Loader2, CheckCircle2, MessageCircle, Copy } from "lucide-react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { PROGRAMS, type ProgramTier } from "@/components/UmrahProgramsSection";
@@ -150,7 +150,7 @@ const UmrahOrderDialog = ({ open, onOpenChange, defaultTier = "silver" }: Props)
 
   useEffect(() => {
     if (open && cateringPackages.length === 0) {
-      supabase
+      apiClient
         .from("catering_packages")
         .select("id,name,meal_type,price_per_meal")
         .eq("is_active", true)
@@ -217,7 +217,7 @@ const UmrahOrderDialog = ({ open, onOpenChange, defaultTier = "silver" }: Props)
 
     setSubmitting(true);
     try {
-      const { data: authData } = await supabase.auth.getUser();
+      const { data: authData } = await apiClient.auth.getUser();
       const userId = authData?.user?.id || "00000000-0000-0000-0000-000000000000";
 
       const payload = {
@@ -244,7 +244,7 @@ const UmrahOrderDialog = ({ open, onOpenChange, defaultTier = "silver" }: Props)
         status: "pending",
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from("umrah_orders")
         .insert(payload)
         .select("tracking_id")

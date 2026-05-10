@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { useIsViewer } from "@/components/admin/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,12 +86,12 @@ export default function AdminMoallemProfilePage() {
     if (!id) return;
     setLoading(true);
     const [mRes, bRes, mpRes, cpRes, accRes, itemsRes] = await Promise.all([
-      supabase.from("moallems").select("*").eq("id", id).maybeSingle(),
-      supabase.from("bookings").select("*, packages(name, type, price)").eq("moallem_id", id).order("created_at", { ascending: false }),
-      supabase.from("moallem_payments").select("*").eq("moallem_id", id).order("date", { ascending: false }),
-      (supabase as any).from("moallem_commission_payments").select("*").eq("moallem_id", id).order("date", { ascending: false }),
-      supabase.from("accounts").select("id, name, type, balance").order("name"),
-      (supabase as any).from("moallem_items").select("*").eq("moallem_id", id).order("created_at", { ascending: false }),
+      apiClient.from("moallems").select("*").eq("id", id).maybeSingle(),
+      apiClient.from("bookings").select("*, packages(name, type, price)").eq("moallem_id", id).order("created_at", { ascending: false }),
+      apiClient.from("moallem_payments").select("*").eq("moallem_id", id).order("date", { ascending: false }),
+      (apiClient as any).from("moallem_commission_payments").select("*").eq("moallem_id", id).order("date", { ascending: false }),
+      apiClient.from("accounts").select("id, name, type, balance").order("name"),
+      (apiClient as any).from("moallem_items").select("*").eq("moallem_id", id).order("created_at", { ascending: false }),
     ]);
     setMoallem(mRes.data);
     setBookings(bRes.data || []);
@@ -110,7 +110,7 @@ export default function AdminMoallemProfilePage() {
     const price = parseFloat(itemForm.unit_price) || 0;
     if (!itemForm.description.trim()) { toast({ title: "Please enter a description", variant: "destructive" }); return; }
     if (qty <= 0 || price <= 0) { toast({ title: "Please enter valid quantity and price", variant: "destructive" }); return; }
-    const { error } = await (supabase as any).from("moallem_items").insert({
+    const { error } = await (apiClient as any).from("moallem_items").insert({
       moallem_id: id,
       description: itemForm.description.trim(),
       quantity: qty,
@@ -125,7 +125,7 @@ export default function AdminMoallemProfilePage() {
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    const { error } = await (supabase as any).from("moallem_items").delete().eq("id", itemId);
+    const { error } = await (apiClient as any).from("moallem_items").delete().eq("id", itemId);
     if (error) { toast({ title: "Failed to delete", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Item deleted successfully" });
     loadData();
@@ -143,13 +143,13 @@ export default function AdminMoallemProfilePage() {
     if (!itemForm.description.trim()) { toast({ title: "Please enter a description", variant: "destructive" }); return; }
     if (qty <= 0 || price <= 0) { toast({ title: "Please enter valid quantity and price", variant: "destructive" }); return; }
     if (editItemId) {
-      const { error } = await (supabase as any).from("moallem_items").update({
+      const { error } = await (apiClient as any).from("moallem_items").update({
         description: itemForm.description.trim(), quantity: qty, unit_price: price, total_amount: qty * price,
       }).eq("id", editItemId);
       if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Item updated successfully" });
     } else {
-      const { error } = await (supabase as any).from("moallem_items").insert({
+      const { error } = await (apiClient as any).from("moallem_items").insert({
         moallem_id: id, description: itemForm.description.trim(), quantity: qty, unit_price: price, total_amount: qty * price,
       });
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
@@ -184,7 +184,7 @@ export default function AdminMoallemProfilePage() {
     const table = editPaymentType === "commission" ? "moallem_commission_payments" : "moallem_payments";
     const serviceLabel = SERVICE_TYPES.find(s => s.value === editPaymentForm.service_type)?.label || "";
     const combinedNotes = [serviceLabel, editPaymentForm.notes.trim()].filter(Boolean).join(" — ");
-    const { error } = await (supabase as any).from(table).update({
+    const { error } = await (apiClient as any).from(table).update({
       amount: parseFloat(editPaymentForm.amount), payment_method: editPaymentForm.payment_method,
       date: editPaymentForm.date || undefined, notes: combinedNotes || null,
       booking_id: editPaymentForm.booking_id || null,
@@ -198,7 +198,7 @@ export default function AdminMoallemProfilePage() {
   const confirmDeletePayment = async () => {
     if (!deletePaymentId) return;
     const table = deletePaymentType === "commission" ? "moallem_commission_payments" : "moallem_payments";
-    const { error } = await (supabase as any).from(table).delete().eq("id", deletePaymentId);
+    const { error } = await (apiClient as any).from(table).delete().eq("id", deletePaymentId);
     if (error) { toast({ title: "Failed to delete", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Payment deleted successfully" });
     setDeletePaymentId(null); loadData();
@@ -209,11 +209,11 @@ export default function AdminMoallemProfilePage() {
     if (!amount || amount <= 0) { toast({ title: "Please enter a valid amount", variant: "destructive" }); return; }
     setPaymentLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) return;
       const serviceLabel = SERVICE_TYPES.find(s => s.value === paymentForm.service_type)?.label || "";
       const combinedNotes = [serviceLabel, paymentForm.notes.trim()].filter(Boolean).join(" — ");
-      const { error } = await supabase.from("moallem_payments").insert({
+      const { error } = await apiClient.from("moallem_payments").insert({
         moallem_id: id, amount,
         payment_method: paymentForm.payment_method,
         date: paymentForm.date,
@@ -231,7 +231,7 @@ export default function AdminMoallemProfilePage() {
         if (remaining <= 0) break;
         const due = Number(booking.due_amount || 0);
         const allocate = Math.min(remaining, due);
-        await supabase.from("payments").insert({
+        await apiClient.from("payments").insert({
           booking_id: booking.id,
           user_id: booking.user_id || session.user.id,
           customer_id: booking.user_id,
@@ -258,11 +258,11 @@ export default function AdminMoallemProfilePage() {
     if (!amount || amount <= 0) { toast({ title: "Please enter a valid amount", variant: "destructive" }); return; }
     setPaymentLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) return;
       const serviceLabel = SERVICE_TYPES.find(s => s.value === commissionForm.service_type)?.label || "";
       const combinedNotes = [serviceLabel, commissionForm.notes.trim()].filter(Boolean).join(" — ");
-      const { error } = await (supabase as any).from("moallem_commission_payments").insert({
+      const { error } = await (apiClient as any).from("moallem_commission_payments").insert({
         moallem_id: id, amount,
         payment_method: commissionForm.payment_method,
         date: commissionForm.date,

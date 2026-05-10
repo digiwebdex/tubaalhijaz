@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,11 +31,11 @@ export default function AdminTicketRefundsPage() {
   const [form, setForm] = useState<any>(emptyForm);
 
   const load = async () => {
-    const { data } = await supabase.from("ticket_refunds").select("*").eq("status", "active").order("created_at", { ascending: false });
+    const { data } = await apiClient.from("ticket_refunds").select("*").eq("status", "active").order("created_at", { ascending: false });
     setItems(data || []);
-    const { data: t } = await supabase.from("ticket_bookings").select("id, invoice_no, passenger_name, customer_billing_amount, our_cost, route").eq("status", "active");
+    const { data: t } = await apiClient.from("ticket_bookings").select("id, invoice_no, passenger_name, customer_billing_amount, our_cost, route").eq("status", "active");
     setTickets(t || []);
-    const { data: w } = await supabase.from("accounts").select("id, name, balance").eq("type", "asset");
+    const { data: w } = await apiClient.from("accounts").select("id, name, balance").eq("type", "asset");
     setWallets(w || []);
   };
   useEffect(() => { load(); }, []);
@@ -56,11 +56,11 @@ export default function AdminTicketRefundsPage() {
     ["id", "invoice_no", "profit", "due"].forEach(k => delete payload[k]);
 
     if (editing) {
-      const { error } = await supabase.from("ticket_refunds").update(payload).eq("id", editing.id);
+      const { error } = await apiClient.from("ticket_refunds").update(payload).eq("id", editing.id);
       if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
       toast({ title: "Updated" });
     } else {
-      const { error } = await supabase.from("ticket_refunds").insert(payload);
+      const { error } = await apiClient.from("ticket_refunds").insert(payload);
       if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
       toast({ title: "Refund recorded" });
     }
@@ -69,7 +69,7 @@ export default function AdminTicketRefundsPage() {
 
   const remove = async (id: string) => {
     if (!confirm("Delete?")) return;
-    await supabase.from("ticket_refunds").update({ status: "deleted" }).eq("id", id);
+    await apiClient.from("ticket_refunds").update({ status: "deleted" }).eq("id", id);
     load();
   };
 

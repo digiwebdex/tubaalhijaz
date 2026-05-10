@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import {
   Download, Edit2, Trash2, Save, X, Search, ChevronDown, ChevronUp,
@@ -64,11 +64,11 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
   useEffect(() => {
     const load = async () => {
       const [bkRes, payRes, expRes, memRes, docRes] = await Promise.all([
-        supabase.from("bookings").select("total_amount, paid_amount, due_amount, total_cost, total_commission, extra_expense, profit_amount").eq("id", bookingId).single(),
-        supabase.from("payments").select("*").eq("booking_id", bookingId).order("installment_number", { ascending: true }),
-        supabase.from("expenses").select("*").eq("booking_id", bookingId).order("date", { ascending: false }),
-        supabase.from("booking_members").select("*, packages(name)").eq("booking_id", bookingId).order("created_at", { ascending: true }),
-        supabase.from("booking_documents").select("*").eq("booking_id", bookingId).order("created_at", { ascending: false }),
+        apiClient.from("bookings").select("total_amount, paid_amount, due_amount, total_cost, total_commission, extra_expense, profit_amount").eq("id", bookingId).single(),
+        apiClient.from("payments").select("*").eq("booking_id", bookingId).order("installment_number", { ascending: true }),
+        apiClient.from("expenses").select("*").eq("booking_id", bookingId).order("date", { ascending: false }),
+        apiClient.from("booking_members").select("*, packages(name)").eq("booking_id", bookingId).order("created_at", { ascending: true }),
+        apiClient.from("booking_documents").select("*").eq("booking_id", bookingId).order("created_at", { ascending: false }),
       ]);
       setBooking(bkRes.data || null);
       setPayments(payRes.data || []);
@@ -296,7 +296,7 @@ export default function AdminBookingsPage() {
   const fetchBookings = async () => {
     setBookingsLoading(true);
 
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from("bookings")
       .select("*, packages(name, type, duration_days, price, start_date), moallems(name, phone)")
       .order("created_at", { ascending: false });
@@ -316,7 +316,7 @@ export default function AdminBookingsPage() {
   };
 
   const fetchAllPayments = () =>
-    supabase.from("payments").select("id, booking_id, amount, paid_at, payment_method, status")
+    apiClient.from("payments").select("id, booking_id, amount, paid_at, payment_method, status")
       .eq("status", "completed")
       .not("paid_at", "is", null)
       .order("paid_at", { ascending: true })
@@ -330,7 +330,7 @@ export default function AdminBookingsPage() {
       });
 
   const fetchBookingDocs = async () => {
-    const { data } = await supabase.from("booking_documents").select("id, booking_id, document_type, file_name, file_path, file_size, created_at").order("created_at", { ascending: false });
+    const { data } = await apiClient.from("booking_documents").select("id, booking_id, document_type, file_name, file_path, file_size, created_at").order("created_at", { ascending: false });
     const grouped: Record<string, any[]> = {};
     (data || []).forEach((d: any) => {
       if (!grouped[d.booking_id]) grouped[d.booking_id] = [];
@@ -350,15 +350,15 @@ export default function AdminBookingsPage() {
       if (!guestName && !guestPhone) return;
       let exists = false;
       if (userId) {
-        const { data: ep } = await supabase.from("profiles").select("id").eq("user_id", userId).limit(1);
+        const { data: ep } = await apiClient.from("profiles").select("id").eq("user_id", userId).limit(1);
         if (ep && ep.length > 0) exists = true;
       }
       if (!exists && guestPhone) {
-        const { data: pp } = await supabase.from("profiles").select("id").eq("phone", guestPhone).limit(1);
+        const { data: pp } = await apiClient.from("profiles").select("id").eq("phone", guestPhone).limit(1);
         if (pp && pp.length > 0) exists = true;
       }
       if (!exists) {
-        const { error: insertErr } = await supabase.from("profiles").insert({
+        const { error: insertErr } = await apiClient.from("profiles").insert({
           user_id: userId || booking.id,
           full_name: guestName,
           phone: guestPhone,
@@ -381,7 +381,7 @@ export default function AdminBookingsPage() {
     setStatusChangeVal(newStatus);
     // Trigger the existing handleStatusChange flow
     const oldStatus = booking.status;
-    const { error } = await supabase.from("bookings").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", bookingId);
+    const { error } = await apiClient.from("bookings").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", bookingId);
     if (error) { toast.error(error.message); setStatusChangeId(null); return; }
     toast.success(`Status updated to ${newStatus}`);
 
@@ -406,7 +406,7 @@ export default function AdminBookingsPage() {
     fetchBookings();
     fetchAllPayments();
     fetchBookingDocs();
-    supabase.from("moallems").select("id, name, phone, status").eq("status", "active").order("name").then(({ data }) => setMoallems(data || []));
+    apiClient.from("moallems").select("id, name, phone, status").eq("status", "active").order("name").then(({ data }) => setMoallems(data || []));
   }, []);
 
   useEffect(() => {
@@ -436,7 +436,7 @@ export default function AdminBookingsPage() {
       booking_type: normalizedType,
     });
 
-    const { data: membersData, error: membersError } = await supabase
+    const { data: membersData, error: membersError } = await apiClient
       .from("booking_members")
       .select("id, booking_id, package_id, full_name, passport_number, selling_price, discount, final_price, created_at")
       .eq("booking_id", b.id)
@@ -556,10 +556,10 @@ export default function AdminBookingsPage() {
           };
 
           if (m.id) {
-            return supabase.from("booking_members").update(memberPayload).eq("id", m.id);
+            return apiClient.from("booking_members").update(memberPayload).eq("id", m.id);
           }
 
-          return supabase.from("booking_members").insert({
+          return apiClient.from("booking_members").insert({
             ...memberPayload,
             booking_id: editingId,
           });
@@ -581,7 +581,7 @@ export default function AdminBookingsPage() {
       ? preparedMembers.map((m: any) => m.passport_number).filter(Boolean).join(", ") || editForm.guest_passport?.trim() || null
       : editForm.guest_passport?.trim() || null;
 
-    const { error } = await supabase.from("bookings").update({
+    const { error } = await apiClient.from("bookings").update({
       status: editForm.status,
       booking_type: isFamily ? "family" : "individual",
       selling_price_per_person: sellingPP,
@@ -613,17 +613,17 @@ export default function AdminBookingsPage() {
     try {
       // Delete all dependent records first to avoid FK constraint violations
       await Promise.all([
-        supabase.from("payments").delete().eq("booking_id", deleteId),
-        supabase.from("expenses").delete().eq("booking_id", deleteId),
-        supabase.from("booking_members").delete().eq("booking_id", deleteId),
-        supabase.from("booking_documents").delete().eq("booking_id", deleteId),
-        supabase.from("moallem_payments").delete().eq("booking_id", deleteId),
-        supabase.from("moallem_commission_payments").delete().eq("booking_id", deleteId),
-        supabase.from("supplier_agent_payments").delete().eq("booking_id", deleteId),
-        supabase.from("notification_logs").delete().eq("booking_id", deleteId),
-        supabase.from("transactions").delete().eq("booking_id", deleteId),
+        apiClient.from("payments").delete().eq("booking_id", deleteId),
+        apiClient.from("expenses").delete().eq("booking_id", deleteId),
+        apiClient.from("booking_members").delete().eq("booking_id", deleteId),
+        apiClient.from("booking_documents").delete().eq("booking_id", deleteId),
+        apiClient.from("moallem_payments").delete().eq("booking_id", deleteId),
+        apiClient.from("moallem_commission_payments").delete().eq("booking_id", deleteId),
+        apiClient.from("supplier_agent_payments").delete().eq("booking_id", deleteId),
+        apiClient.from("notification_logs").delete().eq("booking_id", deleteId),
+        apiClient.from("transactions").delete().eq("booking_id", deleteId),
       ]);
-      const { error } = await supabase.from("bookings").delete().eq("id", deleteId);
+      const { error } = await apiClient.from("bookings").delete().eq("id", deleteId);
       if (error) { toast.error(error.message); return; }
       toast.success("Booking and all related records deleted");
       setDeleteId(null);
@@ -634,7 +634,7 @@ export default function AdminBookingsPage() {
   };
 
   const handleDuplicate = async (b: any) => {
-    const { error } = await supabase.from("bookings").insert({
+    const { error } = await apiClient.from("bookings").insert({
       user_id: b.user_id, package_id: b.package_id, total_amount: b.total_amount,
       num_travelers: b.num_travelers, installment_plan_id: b.installment_plan_id,
       notes: `Duplicated from ${b.tracking_id}`, guest_name: b.guest_name,
@@ -653,7 +653,7 @@ export default function AdminBookingsPage() {
     const booking = bookings.find((b: any) => b.id === statusChangeId);
     const oldStatus = booking?.status;
     
-    const { error } = await supabase.from("bookings").update({ status: statusChangeVal }).eq("id", statusChangeId);
+    const { error } = await apiClient.from("bookings").update({ status: statusChangeVal }).eq("id", statusChangeId);
     if (error) { toast.error(error.message); return; }
     toast.success("Status updated");
 
@@ -696,7 +696,7 @@ export default function AdminBookingsPage() {
             </div>
           </div>`;
 
-        await supabase.functions.invoke("send-notification", {
+        await apiClient.functions.invoke("send-notification", {
           body: {
             type: "booking_status_updated",
             channels: ["sms", "email"],
@@ -725,8 +725,8 @@ export default function AdminBookingsPage() {
       // Fetch payments, booking members, package info, and company in parallel
       // VPS API doesn't support nested selects, so fetch separately
       const [paymentsRes, membersRes, company] = await Promise.all([
-        supabase.from("payments").select("*").eq("booking_id", b.id).order("installment_number", { ascending: true }),
-        supabase.from("booking_members").select("*").eq("booking_id", b.id).order("created_at", { ascending: true }),
+        apiClient.from("payments").select("*").eq("booking_id", b.id).order("installment_number", { ascending: true }),
+        apiClient.from("booking_members").select("*").eq("booking_id", b.id).order("created_at", { ascending: true }),
         getCompanyInfoForPdf(),
       ]);
 
@@ -735,7 +735,7 @@ export default function AdminBookingsPage() {
 
       // If package info missing, fetch it separately
       if (!invoiceBooking.packages && invoiceBooking.package_id) {
-        const { data: pkgData } = await supabase.from("packages").select("name, type, duration_days, start_date, price").eq("id", invoiceBooking.package_id).maybeSingle();
+        const { data: pkgData } = await apiClient.from("packages").select("name, type, duration_days, start_date, price").eq("id", invoiceBooking.package_id).maybeSingle();
         if (pkgData) invoiceBooking.packages = pkgData;
       }
 
@@ -745,7 +745,7 @@ export default function AdminBookingsPage() {
       const memberPackageIds = memberRows.filter((m: any) => m.package_id && !m.packages).map((m: any) => m.package_id);
       if (memberPackageIds.length > 0) {
         const uniqueIds = Array.from(new Set(memberPackageIds));
-        const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", uniqueIds);
+        const { data: pkgs } = await apiClient.from("packages").select("id, name").in("id", uniqueIds);
         const pkgMap: Record<string, string> = {};
         (pkgs || []).forEach((p: any) => { pkgMap[p.id] = p.name; });
         memberRows.forEach((m: any) => {

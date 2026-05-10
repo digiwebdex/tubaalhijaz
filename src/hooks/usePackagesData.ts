@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 
 export function useActivePackages() {
   return useQuery({
     queryKey: ["active_packages"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("packages")
         .select("*")
         .eq("is_active", true)

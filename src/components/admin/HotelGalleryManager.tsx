@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, X, Loader2, Images } from "lucide-react";
 
@@ -26,16 +26,16 @@ export default function HotelGalleryManager({ hotelId, gallery, onUpdate }: Prop
 
       const ext = file.name.split(".").pop();
       const path = `hotels/${hotelId}/gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("hotel-images").upload(path, file);
+      const { error } = await apiClient.storage.from("hotel-images").upload(path, file);
       if (error) continue;
 
-      const { data: { publicUrl } } = supabase.storage.from("hotel-images").getPublicUrl(path);
+      const { data: { publicUrl } } = apiClient.storage.from("hotel-images").getPublicUrl(path);
       newUrls.push(publicUrl);
     }
 
     if (newUrls.length > 0) {
       const updated = [...gallery, ...newUrls];
-      const { error } = await supabase.from("hotels").update({ gallery: updated }).eq("id", hotelId);
+      const { error } = await apiClient.from("hotels").update({ gallery: updated }).eq("id", hotelId);
       if (error) toast.error(error.message);
       else { toast.success(`${newUrls.length} image(s) added`); onUpdate(); }
     }
@@ -45,7 +45,7 @@ export default function HotelGalleryManager({ hotelId, gallery, onUpdate }: Prop
 
   const removeImage = async (url: string) => {
     const updated = gallery.filter((u) => u !== url);
-    const { error } = await supabase.from("hotels").update({ gallery: updated }).eq("id", hotelId);
+    const { error } = await apiClient.from("hotels").update({ gallery: updated }).eq("id", hotelId);
     if (error) toast.error(error.message);
     else { toast.success("Image removed"); onUpdate(); }
   };

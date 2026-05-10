@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth as api, supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
+const api = apiClient.auth;
 import { toast } from "sonner";
 import logo from "@/assets/tuba-logo.png";
 import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle, Smartphone } from "lucide-react";
@@ -96,7 +97,7 @@ const Auth = () => {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-otp", {
+      const { data, error } = await apiClient.functions.invoke("send-otp", {
         body: { phone: cleaned, action: "send" },
       });
       if (error) throw error;
@@ -118,7 +119,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const cleaned = otpPhone.trim().replace(/[^\d+]/g, "");
-      const { data, error } = await supabase.functions.invoke("send-otp", {
+      const { data, error } = await apiClient.functions.invoke("send-otp", {
         body: { phone: cleaned, action: "verify", code: otpCode },
       });
       if (error) throw error;
@@ -126,7 +127,7 @@ const Auth = () => {
 
       if (data?.access_token && data?.refresh_token) {
         // Set session with the tokens
-        const { error: sessionError } = await supabase.auth.setSession({
+        const { error: sessionError } = await apiClient.auth.setSession({
           access_token: data.access_token,
           refresh_token: data.refresh_token,
         });

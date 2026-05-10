@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Eye, EyeOff, Save, LayoutGrid } from "lucide-react";
 import { DEFAULT_SECTIONS, SectionVisibility } from "@/hooks/useSectionVisibility";
@@ -16,7 +16,7 @@ export default function SectionVisibilityManager() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    supabase
+    apiClient
       .from("company_settings")
       .select("*")
       .eq("setting_key", "section_visibility")
@@ -37,7 +37,7 @@ export default function SectionVisibilityManager() {
   const handleSave = async () => {
     setSaving(true);
     // Check if setting already exists
-    const { data: existing } = await supabase
+    const { data: existing } = await apiClient
       .from("company_settings")
       .select("id")
       .eq("setting_key", "section_visibility")
@@ -45,12 +45,12 @@ export default function SectionVisibilityManager() {
 
     let error;
     if (existing?.id) {
-      ({ error } = await supabase
+      ({ error } = await apiClient
         .from("company_settings")
         .update({ setting_value: visibility })
         .eq("id", existing.id));
     } else {
-      ({ error } = await supabase
+      ({ error } = await apiClient
         .from("company_settings")
         .insert({ setting_key: "section_visibility", setting_value: visibility }));
     }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, Fragment } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,19 +55,19 @@ export default function AdminReportsPage() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
-      supabase.from("payments").select("*, bookings(tracking_id, guest_name)").order("created_at", { ascending: false }),
-      supabase.from("expenses").select("*").order("date", { ascending: false }),
-      supabase.from("profiles").select("*"),
-      supabase.from("moallems").select("*"),
-      supabase.from("moallem_payments").select("*").order("date", { ascending: false }),
-      supabase.from("moallem_commission_payments").select("*").order("date", { ascending: false }),
-      supabase.from("supplier_agents").select("*"),
-      supabase.from("supplier_agent_payments").select("*").order("date", { ascending: false }),
-      supabase.from("packages").select("*"),
-      supabase.from("supplier_contracts").select("*").order("created_at", { ascending: false }),
-      supabase.from("supplier_contract_payments").select("*").order("payment_date", { ascending: false }),
-      supabase.from("daily_cashbook").select("*").order("date", { ascending: false }),
+      apiClient.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
+      apiClient.from("payments").select("*, bookings(tracking_id, guest_name)").order("created_at", { ascending: false }),
+      apiClient.from("expenses").select("*").order("date", { ascending: false }),
+      apiClient.from("profiles").select("*"),
+      apiClient.from("moallems").select("*"),
+      apiClient.from("moallem_payments").select("*").order("date", { ascending: false }),
+      apiClient.from("moallem_commission_payments").select("*").order("date", { ascending: false }),
+      apiClient.from("supplier_agents").select("*"),
+      apiClient.from("supplier_agent_payments").select("*").order("date", { ascending: false }),
+      apiClient.from("packages").select("*"),
+      apiClient.from("supplier_contracts").select("*").order("created_at", { ascending: false }),
+      apiClient.from("supplier_contract_payments").select("*").order("payment_date", { ascending: false }),
+      apiClient.from("daily_cashbook").select("*").order("date", { ascending: false }),
     ]).then(([bk, py, ex, pr, ml, mp, cp, sa, sp, pk, sc, scp, dc]) => {
       setBookings(bk.data || []);
       setPayments(py.data || []);

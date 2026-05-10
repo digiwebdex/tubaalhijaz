@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 
 export const DEFAULT_SECTIONS: Record<string, { label: string; labelBn: string; enabled: boolean }> = {
   hero: { label: "Hero Banner", labelBn: "হিরো ব্যানার", enabled: true },
@@ -30,7 +30,7 @@ export function useSectionVisibility() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
+    apiClient
       .from("company_settings")
       .select("*")
       .eq("setting_key", "section_visibility")

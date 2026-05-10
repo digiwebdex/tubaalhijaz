@@ -10,7 +10,7 @@ import suvImg from "@/assets/transport-suv.jpg";
 import sedanImg from "@/assets/transport-sedan.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 
 const collage = [
   { key: "bus", img: busImg, label: { en: "Bus", bn: "বাস" } },
@@ -35,7 +35,7 @@ const TransportSection = () => {
   const { data } = useQuery({
     queryKey: ["transport_services_public"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("transport_services")
         .select("*")
         .eq("is_active", true)

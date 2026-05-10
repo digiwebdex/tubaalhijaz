@@ -6,7 +6,7 @@ import lunchImg from "@/assets/category-lunch.jpg";
 import dinnerImg from "@/assets/category-dinner.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import CateringOrderDialog, { CateringPlan } from "./CateringOrderDialog";
 
 const categoryImages: Record<string, string> = {
@@ -34,7 +34,7 @@ const CateringSection = () => {
   const { data } = useQuery({
     queryKey: ["catering_packages_public"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("catering_packages")
         .select("*")
         .eq("is_active", true)

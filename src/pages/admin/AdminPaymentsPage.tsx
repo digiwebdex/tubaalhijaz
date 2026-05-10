@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Download, Edit2, Trash2, Save, X, Plus, Wallet, Search, CheckCircle, XCircle, Upload, FileText, Loader2, FileDown, FileSpreadsheet, ChevronDown, ChevronRight } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
@@ -94,11 +94,11 @@ export default function AdminPaymentsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const fetchPayments = async () => {
     const [payRes, moallemPayRes, supplierPayRes, walletRes, profileRes] = await Promise.all([
-      supabase.from("payments").select("*, bookings(tracking_id, total_amount, paid_amount, due_amount, guest_name, guest_passport, num_travelers, status, packages(name, type, duration_days))").order("created_at", { ascending: false }),
-      supabase.from("moallem_payments").select("*, moallems(name, phone), bookings:booking_id(tracking_id, total_amount, paid_amount, due_amount, paid_by_moallem, moallem_due, guest_name, packages(name, type))").order("created_at", { ascending: false }),
-      supabase.from("supplier_agent_payments").select("*, supplier_agents(agent_name, company_name), bookings:booking_id(tracking_id, total_amount, total_cost, paid_to_supplier, supplier_due, guest_name, packages(name, type))").order("created_at", { ascending: false }),
-      supabase.from("accounts" as any).select("*").eq("type", "asset"),
-      supabase.from("profiles").select("user_id, full_name, phone"),
+      apiClient.from("payments").select("*, bookings(tracking_id, total_amount, paid_amount, due_amount, guest_name, guest_passport, num_travelers, status, packages(name, type, duration_days))").order("created_at", { ascending: false }),
+      apiClient.from("moallem_payments").select("*, moallems(name, phone), bookings:booking_id(tracking_id, total_amount, paid_amount, due_amount, paid_by_moallem, moallem_due, guest_name, packages(name, type))").order("created_at", { ascending: false }),
+      apiClient.from("supplier_agent_payments").select("*, supplier_agents(agent_name, company_name), bookings:booking_id(tracking_id, total_amount, total_cost, paid_to_supplier, supplier_due, guest_name, packages(name, type))").order("created_at", { ascending: false }),
+      apiClient.from("accounts" as any).select("*").eq("type", "asset"),
+      apiClient.from("profiles").select("user_id, full_name, phone"),
     ]);
     const profileMap = new Map((profileRes.data || []).map((p: any) => [p.user_id, p]));
     const paymentsWithProfiles = (payRes.data || []).map((p: any) => ({
@@ -121,7 +121,7 @@ export default function AdminPaymentsPage() {
   useEffect(() => { fetchPayments(); }, []);
 
   const refreshWallets = async () => {
-    const { data } = await supabase.from("accounts" as any).select("*").eq("type", "asset");
+    const { data } = await apiClient.from("accounts" as any).select("*").eq("type", "asset");
     setWalletAccounts((data as any[]) || []);
   };
 
@@ -130,9 +130,9 @@ export default function AdminPaymentsPage() {
     setPaymentType("customer");
     resetAddForm();
     const [{ data: moallemData }, { data: supplierData }, { data: bookingsData }] = await Promise.all([
-      supabase.from("moallems").select("id, name, phone, total_due, total_deposit").eq("status", "active").order("name"),
-      supabase.from("supplier_agents").select("id, agent_name, company_name, phone").eq("status", "active").order("agent_name"),
-      supabase.from("bookings").select("id, tracking_id, total_amount, paid_amount, due_amount, paid_by_moallem, moallem_due, total_cost, paid_to_supplier, supplier_due, guest_name, guest_phone, guest_passport, user_id, moallem_id, supplier_agent_id, status, packages(name, type)").order("created_at", { ascending: false }),
+      apiClient.from("moallems").select("id, name, phone, total_due, total_deposit").eq("status", "active").order("name"),
+      apiClient.from("supplier_agents").select("id, agent_name, company_name, phone").eq("status", "active").order("agent_name"),
+      apiClient.from("bookings").select("id, tracking_id, total_amount, paid_amount, due_amount, paid_by_moallem, moallem_due, total_cost, paid_to_supplier, supplier_due, guest_name, guest_phone, guest_passport, user_id, moallem_id, supplier_agent_id, status, packages(name, type)").order("created_at", { ascending: false }),
     ]);
     setMoallems(moallemData || []);
     setSuppliers(supplierData || []);
@@ -151,7 +151,7 @@ export default function AdminPaymentsPage() {
     if (!receiptFile) return null;
     const ext = receiptFile.name.split(".").pop();
     const path = `${paymentType}/${paymentId}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("payment-receipts").upload(path, receiptFile, { upsert: true });
+    const { error } = await apiClient.storage.from("payment-receipts").upload(path, receiptFile, { upsert: true });
     if (error) { toast.error("Receipt upload failed: " + error.message); return null; }
     return path;
   };
@@ -227,7 +227,7 @@ export default function AdminPaymentsPage() {
           .reduce((max, p) => Math.max(max, p.installment_number || 0), 0);
         const tempId = crypto.randomUUID();
         const receiptPath = await uploadReceiptFile(tempId);
-        const { error } = await supabase.from("payments").insert({
+        const { error } = await apiClient.from("payments").insert({
           booking_id: addForm.booking_id, user_id: userId,
           customer_id: addForm.customer_id || null, amount: parseFloat(addForm.amount),
           payment_method: addForm.payment_method, transaction_id: addForm.transaction_id.trim() || null,
@@ -246,10 +246,10 @@ export default function AdminPaymentsPage() {
       if (!addForm.moallem_id) { toast.error("Please select a moallem"); return; }
       setAddLoading(true);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await apiClient.auth.getSession();
         const tempId = crypto.randomUUID();
         const receiptPath = await uploadReceiptFile(tempId);
-        const { error } = await supabase.from("moallem_payments").insert({
+        const { error } = await apiClient.from("moallem_payments").insert({
           moallem_id: addForm.moallem_id,
           booking_id: addForm.booking_id || null,
           amount: parseFloat(addForm.amount),
@@ -270,10 +270,10 @@ export default function AdminPaymentsPage() {
       if (!addForm.supplier_id) { toast.error("Please select a supplier"); return; }
       setAddLoading(true);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await apiClient.auth.getSession();
         const tempId = crypto.randomUUID();
         const receiptPath = await uploadReceiptFile(tempId);
-        const { error } = await supabase.from("supplier_agent_payments").insert({
+        const { error } = await apiClient.from("supplier_agent_payments").insert({
           supplier_agent_id: addForm.supplier_id,
           booking_id: addForm.booking_id || null,
           amount: parseFloat(addForm.amount),
@@ -296,7 +296,7 @@ export default function AdminPaymentsPage() {
   const markPaid = async (id: string, walletId?: string) => {
     const update: any = { status: "completed", paid_at: new Date().toISOString() };
     if (walletId) update.wallet_account_id = walletId;
-    const { error } = await supabase.from("payments").update(update).eq("id", id);
+    const { error } = await apiClient.from("payments").update(update).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Payment completed"); fetchPayments();
   };
@@ -318,21 +318,21 @@ export default function AdminPaymentsPage() {
     const combinedNotes = [serviceLabel, (editForm.notes || "").trim()].filter(Boolean).join(" — ") || null;
 
     if (editType === "moallem") {
-      const { error } = await supabase.from("moallem_payments").update({
+      const { error } = await apiClient.from("moallem_payments").update({
         amount: parseFloat(editForm.amount), payment_method: editForm.payment_method,
         notes: combinedNotes, date: editForm.date || undefined,
       }).eq("id", editingId);
       if (error) { toast.error(error.message); return; }
       toast.success("Moallem payment updated"); setEditingId(null); setShowEditModal(false); fetchPayments();
     } else if (editType === "supplier") {
-      const { error } = await supabase.from("supplier_agent_payments").update({
+      const { error } = await apiClient.from("supplier_agent_payments").update({
         amount: parseFloat(editForm.amount), payment_method: editForm.payment_method,
         notes: combinedNotes, date: editForm.date || undefined,
       }).eq("id", editingId);
       if (error) { toast.error(error.message); return; }
       toast.success("Supplier payment updated"); setEditingId(null); setShowEditModal(false); fetchPayments();
     } else {
-      const { error } = await supabase.from("payments").update({
+      const { error } = await apiClient.from("payments").update({
         amount: parseFloat(editForm.amount), due_date: editForm.due_date || null,
         status: editForm.status, payment_method: editForm.payment_method,
         notes: combinedNotes, transaction_id: editForm.transaction_id || null,
@@ -346,13 +346,13 @@ export default function AdminPaymentsPage() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     if (deleteType === "moallem") {
-      const { error } = await supabase.from("moallem_payments").delete().eq("id", deleteId);
+      const { error } = await apiClient.from("moallem_payments").delete().eq("id", deleteId);
       if (error) { toast.error(error.message); return; }
     } else if (deleteType === "supplier") {
-      const { error } = await supabase.from("supplier_agent_payments").delete().eq("id", deleteId);
+      const { error } = await apiClient.from("supplier_agent_payments").delete().eq("id", deleteId);
       if (error) { toast.error(error.message); return; }
     } else {
-      const { error } = await supabase.from("payments").delete().eq("id", deleteId);
+      const { error } = await apiClient.from("payments").delete().eq("id", deleteId);
       if (error) { toast.error(error.message); return; }
     }
     toast.success("Payment deleted"); setDeleteId(null); fetchPayments();
@@ -361,8 +361,8 @@ export default function AdminPaymentsPage() {
   const handleReceipt = async (p: any) => {
     setGeneratingId(p.id);
     try {
-      const { data: profile } = await supabase.from("profiles").select("full_name, phone, passport_number, address").eq("user_id", p.user_id).maybeSingle();
-      const { data: allPayments } = await supabase.from("payments").select("*").eq("booking_id", p.booking_id);
+      const { data: profile } = await apiClient.from("profiles").select("full_name, phone, passport_number, address").eq("user_id", p.user_id).maybeSingle();
+      const { data: allPayments } = await apiClient.from("payments").select("*").eq("booking_id", p.booking_id);
       const company = await getCompanyInfoForPdf();
       const booking = p.bookings || {};
       await generateReceipt(p as InvoicePayment, { ...booking, packages: booking.packages }, profile || {}, company, (allPayments || []) as InvoicePayment[]);
@@ -754,7 +754,7 @@ export default function AdminPaymentsPage() {
                             { label: "Delete", icon: <Trash2 className="h-3.5 w-3.5" />, onClick: () => { setDeleteId(p.id); setDeleteType("customer"); }, variant: "destructive", hidden: !canModify, separator: true },
                             { label: "Approve", icon: <CheckCircle className="h-3.5 w-3.5" />, onClick: () => { setMarkPaidId(p.id); setMarkPaidWallet(""); }, variant: "success", hidden: !canModify || p.status !== "pending" },
                             { label: "Reject", icon: <XCircle className="h-3.5 w-3.5" />, onClick: async () => {
-                              const { error } = await supabase.from("payments").update({ status: "failed" }).eq("id", p.id);
+                              const { error } = await apiClient.from("payments").update({ status: "failed" }).eq("id", p.id);
                               if (error) toast.error(error.message);
                               else { toast.success("Payment rejected"); fetchPayments(); }
                             }, variant: "destructive", hidden: !canModify || p.status !== "pending" },
@@ -1050,7 +1050,7 @@ export default function AdminPaymentsPage() {
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Receipt File</h4>
                   <button
                     onClick={async () => {
-                      const { data } = await supabase.storage.from("payment-receipts").createSignedUrl(viewPayment.receipt_file_path, 300);
+                      const { data } = await apiClient.storage.from("payment-receipts").createSignedUrl(viewPayment.receipt_file_path, 300);
                       if (data?.signedUrl) window.open(data.signedUrl, "_blank");
                       else toast.error("Failed to load file");
                     }}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, Edit2, Trash2, Save, X } from "lucide-react";
 import { useIsViewer } from "@/components/admin/AdminLayout";
@@ -23,8 +23,8 @@ export default function AdminCateringPage() {
 
   const fetchAll = async () => {
     const [p, o] = await Promise.all([
-      supabase.from("catering_packages").select("*").order("display_order"),
-      supabase.from("catering_orders").select("*").order("created_at", { ascending: false }),
+      apiClient.from("catering_packages").select("*").order("display_order"),
+      apiClient.from("catering_orders").select("*").order("created_at", { ascending: false }),
     ]);
     setPackages(p.data || []);
     setOrders(o.data || []);
@@ -39,8 +39,8 @@ export default function AdminCateringPage() {
       display_order: Number(form.display_order) || 0,
     };
     const res = editingId
-      ? await supabase.from("catering_packages").update(payload).eq("id", editingId)
-      : await supabase.from("catering_packages").insert(payload);
+      ? await apiClient.from("catering_packages").update(payload).eq("id", editingId)
+      : await apiClient.from("catering_packages").insert(payload);
     if (res.error) return toast.error(res.error.message);
     toast.success("Saved");
     setShowForm(false); setForm(EMPTY); setEditingId(null);
@@ -49,13 +49,13 @@ export default function AdminCateringPage() {
 
   const remove = async (id: string) => {
     if (!confirm("Delete this catering package?")) return;
-    const { error } = await supabase.from("catering_packages").delete().eq("id", id);
+    const { error } = await apiClient.from("catering_packages").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Deleted"); fetchAll();
   };
 
   const updateOrderStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("catering_orders").update({ status }).eq("id", id);
+    const { error } = await apiClient.from("catering_orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Updated"); fetchAll();
   };

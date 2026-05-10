@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import logoEn from "@/assets/logo-nobg.png";
 import logoBn from "@/assets/logo-bangla.png";
@@ -29,7 +29,7 @@ const ResetPassword = () => {
     if (hash.includes("type=recovery")) {
       setIsRecovery(true);
     }
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsRecovery(true);
       }
@@ -52,7 +52,7 @@ const ResetPassword = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await apiClient.auth.updateUser({ password });
       if (error) throw error;
       toast.success(t("reset.success"));
       navigate("/dashboard");

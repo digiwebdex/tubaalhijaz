@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 
 // ─── Types ───
 export interface FBPixelConfig {
@@ -112,7 +112,7 @@ export async function sendServerEvent(event: {
   test_event_code?: string;
 }) {
   try {
-    const { data, error } = await supabase.functions.invoke("fb-conversions-api", {
+    const { data, error } = await apiClient.functions.invoke("fb-conversions-api", {
       body: event,
     });
     if (error) console.warn("CAPI error:", error);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { Check, ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -18,7 +18,7 @@ const PackageDetail = () => {
 
   useEffect(() => {
     const fetchPkg = async () => {
-      const { data } = await supabase.from("packages").select("*").eq("id", id).eq("is_active", true).eq("show_on_website", true).single();
+      const { data } = await apiClient.from("packages").select("*").eq("id", id).eq("is_active", true).eq("show_on_website", true).single();
       setPkg(data);
       setLoading(false);
     };

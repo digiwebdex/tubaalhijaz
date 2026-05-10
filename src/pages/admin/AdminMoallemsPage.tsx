@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { useIsViewer } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,8 +51,8 @@ export default function AdminMoallemsPage() {
   const fetchData = async () => {
     setLoading(true);
     const [m, b] = await Promise.all([
-      supabase.from("moallems").select("*").order("created_at", { ascending: false }),
-      supabase.from("bookings").select("id, moallem_id, num_travelers, total_amount, paid_by_moallem, moallem_due"),
+      apiClient.from("moallems").select("*").order("created_at", { ascending: false }),
+      apiClient.from("bookings").select("id, moallem_id, num_travelers, total_amount, paid_by_moallem, moallem_due"),
     ]);
     if (m.data) setMoallems(m.data);
     if (b.data) setBookings(b.data);
@@ -94,11 +94,11 @@ export default function AdminMoallemsPage() {
       contracted_amount: parseFloat(form.contracted_amount) || 0,
     };
     if (editId) {
-      const { error } = await supabase.from("moallems").update(payload).eq("id", editId);
+      const { error } = await apiClient.from("moallems").update(payload).eq("id", editId);
       if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Moallem updated successfully" });
     } else {
-      const { error } = await supabase.from("moallems").insert(payload);
+      const { error } = await apiClient.from("moallems").insert(payload);
       if (error) { toast({ title: "Creation failed", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Moallem created successfully" });
     }
@@ -112,7 +112,7 @@ export default function AdminMoallemsPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("moallems").delete().eq("id", deleteId);
+    const { error } = await apiClient.from("moallems").delete().eq("id", deleteId);
     if (error) { toast({ title: "Failed to delete", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Moallem deleted successfully" }); setDeleteId(null); fetchData();
   };

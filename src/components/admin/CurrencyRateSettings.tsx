@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Loader2, Coins } from "lucide-react";
 
@@ -10,7 +10,7 @@ export default function CurrencyRateSettings() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase
+    apiClient
       .from("company_settings")
       .select("setting_value")
       .eq("setting_key", "currency_rate")
@@ -30,7 +30,7 @@ export default function CurrencyRateSettings() {
       return;
     }
     setSaving(true);
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("company_settings")
       .update({ setting_value: { sar_to_bdt: numRate, show_dual_currency: showDual } })
       .eq("setting_key", "currency_rate");

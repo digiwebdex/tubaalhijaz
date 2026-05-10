@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Upload, FileText, Trash2, Check, Loader2 } from "lucide-react";
 
@@ -52,7 +52,7 @@ const DocumentUpload = ({ bookingId, userId, documents, onUploaded }: Props) => 
     const ext = file.name.split(".").pop();
     const filePath = `${userId}/${bookingId}/${docType}_${Date.now()}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await apiClient.storage
       .from("booking-documents")
       .upload(filePath, file);
 
@@ -65,13 +65,13 @@ const DocumentUpload = ({ bookingId, userId, documents, onUploaded }: Props) => 
     // Remove old doc record if exists
     const existing = getDocForType(docType);
     if (existing) {
-      await supabase.from("booking_documents").delete().eq("id", existing.id);
+      await apiClient.from("booking_documents").delete().eq("id", existing.id);
       if (existing.file_path) {
-        await supabase.storage.from("booking-documents").remove([existing.file_path]);
+        await apiClient.storage.from("booking-documents").remove([existing.file_path]);
       }
     }
 
-    const { error: dbError } = await supabase.from("booking_documents").insert({
+    const { error: dbError } = await apiClient.from("booking_documents").insert({
       booking_id: bookingId,
       user_id: userId,
       document_type: docType,
@@ -90,8 +90,8 @@ const DocumentUpload = ({ bookingId, userId, documents, onUploaded }: Props) => 
   };
 
   const handleDelete = async (doc: any) => {
-    await supabase.storage.from("booking-documents").remove([doc.file_path]);
-    await supabase.from("booking_documents").delete().eq("id", doc.id);
+    await apiClient.storage.from("booking-documents").remove([doc.file_path]);
+    await apiClient.from("booking_documents").delete().eq("id", doc.id);
     toast.success("Document removed");
     onUploaded();
   };

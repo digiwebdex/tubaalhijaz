@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,12 +36,12 @@ export default function AdminSettlementsPage() {
 
   const load = async () => {
     const [s, it, w, t, v, r] = await Promise.all([
-      supabase.from("settlements").select("*").order("created_at", { ascending: false }),
-      supabase.from("settlement_items").select("*"),
-      supabase.from("accounts").select("id, name, balance").eq("type", "asset"),
-      supabase.from("ticket_bookings").select("id, invoice_no, passenger_name, customer_due").eq("status", "active").gt("customer_due", 0),
-      supabase.from("visa_applications").select("id, invoice_no, applicant_name, customer_due").eq("status", "active").gt("customer_due", 0),
-      supabase.from("ticket_refunds").select("id, invoice_no, passenger_name, due").eq("status", "active").gt("due", 0),
+      apiClient.from("settlements").select("*").order("created_at", { ascending: false }),
+      apiClient.from("settlement_items").select("*"),
+      apiClient.from("accounts").select("id, name, balance").eq("type", "asset"),
+      apiClient.from("ticket_bookings").select("id, invoice_no, passenger_name, customer_due").eq("status", "active").gt("customer_due", 0),
+      apiClient.from("visa_applications").select("id, invoice_no, applicant_name, customer_due").eq("status", "active").gt("customer_due", 0),
+      apiClient.from("ticket_refunds").select("id, invoice_no, passenger_name, due").eq("status", "active").gt("due", 0),
     ]);
     setSettlements(s.data || []);
     setItems(it.data || []);
@@ -72,12 +72,12 @@ export default function AdminSettlementsPage() {
     if (allocations.length === 0) { toast({ title: "Add at least one invoice", variant: "destructive" }); return; }
     if (total <= 0) { toast({ title: "Total must be > 0", variant: "destructive" }); return; }
 
-    const { data: settlement, error } = await supabase.from("settlements")
+    const { data: settlement, error } = await apiClient.from("settlements")
       .insert({ ...form, total_amount: total, status: "completed" }).select().single();
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
 
     const itemsToInsert = allocations.map(a => ({ settlement_id: settlement.id, ...a }));
-    const { error: e2 } = await supabase.from("settlement_items").insert(itemsToInsert);
+    const { error: e2 } = await apiClient.from("settlement_items").insert(itemsToInsert);
     if (e2) return toast({ title: "Items failed", description: e2.message, variant: "destructive" });
 
     toast({ title: `Settlement ${settlement.settlement_no} recorded` });
@@ -88,7 +88,7 @@ export default function AdminSettlementsPage() {
 
   const removeSettlement = async (id: string, no: string) => {
     if (!confirm(`Delete ${no}? This will reverse the wallet credit.`)) return;
-    const { error } = await supabase.from("settlements").delete().eq("id", id);
+    const { error } = await apiClient.from("settlements").delete().eq("id", id);
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
     toast({ title: "Deleted" });
     load();

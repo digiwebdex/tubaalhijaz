@@ -11,7 +11,7 @@ import {
   type SummaryCard, type InfoField, type PdfCompanyConfig, type SignatureData,
 } from "./pdfCore";
 import { generateTrackingQr, addQrToDoc, addPaymentWatermark } from "./pdfQrCode";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { registerBengaliFont, addBengaliText, hasBengali } from "./pdfFontLoader";
 import { getSignatureData } from "./pdfSignature";
 import { getPdfCompanyConfig } from "./pdfCompanyConfig";
@@ -94,7 +94,7 @@ function ensurePageSpaceLocal(doc: jsPDF, y: number, requiredHeight: number, nex
 
 // ── Fetch booking members ──
 async function fetchBookingMembers(bookingId: string, fallbackPackageName = "N/A"): Promise<BookingMember[]> {
-  const { data, error } = await supabase
+  const { data, error } = await apiClient
     .from("booking_members")
     .select("full_name, passport_number, selling_price, discount, final_price, package_id, packages(name)")
     .eq("booking_id", bookingId)
@@ -110,7 +110,7 @@ async function fetchBookingMembers(bookingId: string, fallbackPackageName = "N/A
 
 // ── Fetch moallem name ──
 async function fetchMoallemName(moallemId: string): Promise<string> {
-  const { data } = await supabase.from("moallems").select("name").eq("id", moallemId).maybeSingle();
+  const { data } = await apiClient.from("moallems").select("name").eq("id", moallemId).maybeSingle();
   return data?.name || "N/A";
 }
 
@@ -173,7 +173,7 @@ const isGenericTravelerLabel = (value?: string | null): boolean => {
 async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string, string>> {
   const uniqueIds = Array.from(new Set(packageIds.filter(Boolean)));
   if (uniqueIds.length === 0) return {};
-  const { data, error } = await supabase.from("packages").select("id, name").in("id", uniqueIds);
+  const { data, error } = await apiClient.from("packages").select("id, name").in("id", uniqueIds);
   if (error) return {};
   return (data || []).reduce((acc: Record<string, string>, row: any) => {
     const id = cleanText(row?.id);
@@ -186,7 +186,7 @@ async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string,
 async function fetchBookingGuestFallback(trackingId: string): Promise<{ guest_name: string | null; guest_passport: string | null } | null> {
   const normalizedTrackingId = cleanText(trackingId).toUpperCase();
   if (!normalizedTrackingId) return null;
-  const { data, error } = await supabase
+  const { data, error } = await apiClient
     .from("bookings").select("guest_name, guest_passport")
     .eq("tracking_id", normalizedTrackingId).maybeSingle();
   if (error) return null;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { formatTrackingId } from "@/lib/utils";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import {
   LogOut, Package, CreditCard, AlertTriangle, User, FileText,
@@ -72,11 +72,11 @@ const Dashboard = () => {
   const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((event, session) => {
       if (!session) { navigate("/auth"); return; }
       setUser(session.user);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    apiClient.auth.getSession().then(({ data: { session } }) => {
       if (!session) { navigate("/auth"); return; }
       setUser(session.user);
     });
@@ -87,10 +87,10 @@ const Dashboard = () => {
     if (!user) return;
     setLoading(true);
     const [profileRes, bookingsRes, paymentsRes, docsRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("bookings").select("*, packages(name, type)").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("payments").select("*").eq("user_id", user.id).order("due_date", { ascending: true }),
-      supabase.from("booking_documents").select("*").eq("user_id", user.id),
+      apiClient.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      apiClient.from("bookings").select("*, packages(name, type)").eq("user_id", user.id).order("created_at", { ascending: false }),
+      apiClient.from("payments").select("*").eq("user_id", user.id).order("due_date", { ascending: true }),
+      apiClient.from("booking_documents").select("*").eq("user_id", user.id),
     ]);
     setProfile(profileRes.data);
     if (profileRes.data) {
@@ -115,7 +115,7 @@ const Dashboard = () => {
   useEffect(() => { fetchData(); }, [user]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await apiClient.auth.signOut();
     toast.success(t("dashboard.signedOut"));
     navigate("/");
   };
@@ -123,7 +123,7 @@ const Dashboard = () => {
   const handleSaveProfile = async () => {
     if (!profileForm.full_name.trim()) { toast.error(t("dashboard.nameRequired")); return; }
     setSavingProfile(true);
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("profiles")
       .update({
         full_name: profileForm.full_name.trim(),
@@ -150,7 +150,7 @@ const Dashboard = () => {
     payments.filter((p) => p.booking_id === bookingId).sort((a, b) => (a.installment_number || 0) - (b.installment_number || 0));
 
   const getCompanyInfo = async (): Promise<CompanyInfo> => {
-    const { data: cms } = await supabase.from("site_content" as any).select("content").eq("section_key", "contact").maybeSingle();
+    const { data: cms } = await apiClient.from("site_content" as any).select("content").eq("section_key", "contact").maybeSingle();
     const c = (cms as any)?.content || {};
     return { name: "TUBA ALHIJAZ", phone: c.phone || "", email: c.email || "", address: c.location || "" };
   };
@@ -161,7 +161,7 @@ const Dashboard = () => {
       const bPayments = getBookingPayments(b.id);
       const [company, bookingRes] = await Promise.all([
         getCompanyInfo(),
-        supabase
+        apiClient
           .from("bookings")
           .select("*, packages(name, type, duration_days, start_date, price), booking_members(full_name, passport_number, selling_price, discount, final_price, package_id, packages(name))")
           .eq("id", b.id)

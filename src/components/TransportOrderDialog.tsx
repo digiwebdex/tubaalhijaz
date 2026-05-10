@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, Plus, X, Trash2 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -167,7 +167,7 @@ export default function TransportOrderDialog({ open, onOpenChange, service }: Pr
         nights: nightsBetween(h.check_in, h.check_out),
       }));
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (apiClient as any)
         .from("transport_voucher_orders")
         .insert({
           agent_name: agentName || null,
@@ -196,7 +196,7 @@ export default function TransportOrderDialog({ open, onOpenChange, service }: Pr
 
       // Fire-and-forget admin notification
       try {
-        await (supabase as any).functions.invoke("send-notification", {
+        await (apiClient as any).functions.invoke("send-notification", {
           body: {
             event_type: "transport_voucher_order",
             subject: `New Transport Voucher Booking — ${transportType}`,

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export default function AdminAuditLogsPage() {
 
   const fetchLogs = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from("audit_logs")
       .select("*")
       .order("created_at", { ascending: false })

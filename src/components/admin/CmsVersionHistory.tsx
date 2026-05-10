@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCmsVersions } from "@/hooks/useSiteContent";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { History, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,17 +21,17 @@ export default function CmsVersionHistory() {
   const queryClient = useQueryClient();
 
   const restoreVersion = async (version: any) => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await apiClient.auth.getSession();
 
     // Save current content as a version first
-    const { data: current } = await supabase
+    const { data: current } = await apiClient
       .from("site_content" as any)
       .select("content")
       .eq("section_key", version.section_key)
       .maybeSingle();
 
     if ((current as any)?.content) {
-      await supabase.from("cms_versions" as any).insert({
+      await apiClient.from("cms_versions" as any).insert({
         section_key: version.section_key,
         content: (current as any).content,
         updated_by: session?.user?.id || null,
@@ -40,7 +40,7 @@ export default function CmsVersionHistory() {
     }
 
     // Restore the selected version
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("site_content" as any)
       .update({ content: version.content, updated_by: session?.user?.id || null } as any)
       .eq("section_key", version.section_key);

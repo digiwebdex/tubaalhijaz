@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { formatTrackingId } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +46,7 @@ export default function AdminNotificationsPage() {
 
   const fetchLogs = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("notification_logs" as any)
       .select("*")
       .order("created_at", { ascending: false })
@@ -56,7 +56,7 @@ export default function AdminNotificationsPage() {
   };
 
   const fetchBookings = async () => {
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("bookings")
       .select("id, tracking_id, user_id, total_amount, paid_amount, packages(name)")
       .order("created_at", { ascending: false })
@@ -105,7 +105,7 @@ export default function AdminNotificationsPage() {
 
     setSending(true);
     try {
-      const { error } = await supabase.functions.invoke("send-notification", {
+      const { error } = await apiClient.functions.invoke("send-notification", {
         body: {
           type: sendForm.type,
           channels: sendForm.channels,

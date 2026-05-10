@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { ArrowLeft, Save, User, Phone, Mail, MapPin, FileText, Plus, Trash2, Upload, X, CheckCircle, File } from "lucide-react";
 import CustomerSearchSelect from "@/components/admin/CustomerSearchSelect";
@@ -71,10 +71,10 @@ export default function AdminCreateBookingPage() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("packages").select("id, name, type, price, duration_days").eq("is_active", true).order("name"),
-      supabase.from("moallems").select("id, name, phone, status").eq("status", "active").order("name"),
-      supabase.from("accounts" as any).select("*").eq("type", "asset"),
-      supabase.from("supplier_agents").select("id, agent_name, company_name, phone, status").eq("status", "active").order("agent_name"),
+      apiClient.from("packages").select("id, name, type, price, duration_days").eq("is_active", true).order("name"),
+      apiClient.from("moallems").select("id, name, phone, status").eq("status", "active").order("name"),
+      apiClient.from("accounts" as any).select("*").eq("type", "asset"),
+      apiClient.from("supplier_agents").select("id, agent_name, company_name, phone, status").eq("status", "active").order("agent_name"),
     ]).then(([pkgRes, moaRes, walletRes, supRes]) => {
       setPackages(pkgRes.data || []);
       const moallemsList = moaRes.data || [];
@@ -196,7 +196,7 @@ export default function AdminCreateBookingPage() {
         }
         const uploadData = await uploadRes.json();
 
-        await supabase.from("booking_documents").insert({
+        await apiClient.from("booking_documents").insert({
           booking_id: bookingId,
           user_id: userId,
           document_type: docType,
@@ -229,7 +229,7 @@ export default function AdminCreateBookingPage() {
 
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) { toast.error("Not authenticated"); return; }
 
       const guestName = bookingType === "family" && members.length > 0
@@ -270,7 +270,7 @@ export default function AdminCreateBookingPage() {
       bookingData.due_amount = dueAmount;
       if (bookingType === "individual" && discountVal > 0) bookingData.discount = discountVal;
 
-      const { data: booking, error } = await supabase.from("bookings").insert(bookingData as any).select("id, tracking_id").single();
+      const { data: booking, error } = await apiClient.from("bookings").insert(bookingData as any).select("id, tracking_id").single();
       if (error) throw error;
 
       // Insert family members
@@ -285,16 +285,16 @@ export default function AdminCreateBookingPage() {
           final_price: Math.max(0, num(m.selling_price) - num(m.discount)),
         }));
 
-        const { error: membersError } = await supabase.from("booking_members" as any).insert(memberRows);
+        const { error: membersError } = await apiClient.from("booking_members" as any).insert(memberRows);
         if (membersError) {
-          await supabase.from("bookings").delete().eq("id", booking.id);
+          await apiClient.from("bookings").delete().eq("id", booking.id);
           throw new Error(membersError.message || "Failed to save traveler details");
         }
       }
 
       // Initial payment
       if (paidAmount > 0 && booking) {
-        await supabase.from("payments").insert({
+        await apiClient.from("payments").insert({
           booking_id: booking.id,
           user_id: selectedCustomerId || session.user.id,
           customer_id: selectedCustomerId,

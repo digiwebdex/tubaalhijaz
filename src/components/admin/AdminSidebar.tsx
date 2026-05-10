@@ -11,7 +11,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarHeader, SidebarFooter, SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { useNavigate } from "react-router-dom";
 import type { AppRole } from "@/hooks/useUserRole";
 
@@ -63,7 +63,7 @@ export function AdminSidebar({ role }: { role: AppRole }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await apiClient.auth.signOut();
     navigate("/");
   };
 

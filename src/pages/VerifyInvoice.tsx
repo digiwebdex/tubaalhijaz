@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { CheckCircle, XCircle, FileText, Loader2 } from "lucide-react";
 import { generateVerificationId } from "@/lib/pdfQrCode";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -46,7 +46,7 @@ export default function VerifyInvoice() {
 
       if (trackingId) {
         try {
-          const { data, error } = await supabase.functions.invoke("verify-invoice", {
+          const { data, error } = await apiClient.functions.invoke("verify-invoice", {
             body: { tracking_id: trackingId },
           });
 
@@ -64,7 +64,7 @@ export default function VerifyInvoice() {
 
       if (invoiceNumber) {
         try {
-          const { data } = await supabase.functions.invoke("verify-invoice", {
+          const { data } = await apiClient.functions.invoke("verify-invoice", {
             body: { tracking_id: invoiceNumber },
           });
 

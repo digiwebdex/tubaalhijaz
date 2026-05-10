@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,9 +56,9 @@ export default function AdminTicketsPage() {
   const [search, setSearch] = useState("");
 
   const load = async () => {
-    const { data } = await supabase.from("ticket_bookings").select("*").eq("status", "active").order("created_at", { ascending: false });
+    const { data } = await apiClient.from("ticket_bookings").select("*").eq("status", "active").order("created_at", { ascending: false });
     setItems((data as any) || []);
-    const { data: v } = await supabase.from("supplier_agents").select("id, agent_name, company_name").eq("status", "active");
+    const { data: v } = await apiClient.from("supplier_agents").select("id, agent_name, company_name").eq("status", "active");
     setVendors(v || []);
   };
 
@@ -77,11 +77,11 @@ export default function AdminTicketsPage() {
     delete (payload as any).payment_status;
 
     if (editing) {
-      const { error } = await supabase.from("ticket_bookings").update(payload).eq("id", editing.id);
+      const { error } = await apiClient.from("ticket_bookings").update(payload).eq("id", editing.id);
       if (error) return toast({ title: "Update failed", description: error.message, variant: "destructive" });
       toast({ title: "Ticket booking updated" });
     } else {
-      const { error } = await supabase.from("ticket_bookings").insert(payload as any);
+      const { error } = await apiClient.from("ticket_bookings").insert(payload as any);
       if (error) return toast({ title: "Create failed", description: error.message, variant: "destructive" });
       toast({ title: "Ticket booking created" });
     }
@@ -90,7 +90,7 @@ export default function AdminTicketsPage() {
 
   const remove = async (id: string) => {
     if (!confirm("Soft-delete this ticket booking?")) return;
-    const { error } = await supabase.from("ticket_bookings").update({ status: "deleted" }).eq("id", id);
+    const { error } = await apiClient.from("ticket_bookings").update({ status: "deleted" }).eq("id", id);
     if (error) return toast({ title: "Delete failed", description: error.message, variant: "destructive" });
     toast({ title: "Deleted" });
     load();

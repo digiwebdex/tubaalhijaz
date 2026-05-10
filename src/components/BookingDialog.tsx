@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { ArrowRight, Package, Users, CreditCard, Check, User, FileText, Upload, X, Camera, ImageIcon } from "lucide-react";
@@ -90,10 +90,10 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
     setLoading(true);
 
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (session) {
         setUser(session.user);
-        const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", session.user.id).single();
+        const { data: profile } = await apiClient.from("profiles").select("*").eq("user_id", session.user.id).single();
         if (profile) {
           setPersonalInfo({ fullName: profile.full_name || "", phone: profile.phone || "", passportNumber: profile.passport_number || "", address: profile.address || "" });
           setEmail(session.user.email || "");
@@ -101,8 +101,8 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
       }
 
       const [pkgRes, planRes] = await Promise.all([
-        supabase.from("packages").select("*").eq("id", packageId).eq("is_active", true).single(),
-        supabase.from("installment_plans").select("*").eq("is_active", true).order("num_installments"),
+        apiClient.from("packages").select("*").eq("id", packageId).eq("is_active", true).single(),
+        apiClient.from("installment_plans").select("*").eq("is_active", true).order("num_installments"),
       ]);
       setPkg(pkgRes.data);
       setPlans(planRes.data || []);
@@ -115,7 +115,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
       } catch {}
       if (methods.length === 0) {
         try {
-          const { data: sd } = await supabase.from("company_settings").select("setting_value").eq("setting_key", "payment_methods").single();
+          const { data: sd } = await apiClient.from("company_settings").select("setting_value").eq("setting_key", "payment_methods").single();
           if (sd?.setting_value) methods = normalizePaymentMethods(sd.setting_value);
         } catch {}
       }
@@ -160,7 +160,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
       const paymentNote = isBankMethod && transferAmount
         ? `${selectedMethod?.name || selectedPaymentMethod} — ৳${transferAmount} transferred`
         : undefined;
-      const response = await supabase.functions.invoke("create-guest-booking", {
+      const response = await apiClient.functions.invoke("create-guest-booking", {
         body: {
           fullName: personalInfo.fullName.trim(), phone: personalInfo.phone.trim(),
           email: email.trim() || null, address: personalInfo.address.trim() || null,
@@ -182,7 +182,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
           formData.append("tracking_id", result.tracking_id);
           formData.append("document_type", doc.type);
           formData.append("file", doc.file);
-          const uploadRes = await supabase.functions.invoke("upload-booking-document", { body: formData });
+          const uploadRes = await apiClient.functions.invoke("upload-booking-document", { body: formData });
           if (uploadRes.error) console.error("Doc upload failed:", doc.type, uploadRes.error);
         }
       }
@@ -194,7 +194,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
         formData.append("tracking_id", result.tracking_id);
         formData.append("document_type", "payment_receipt");
         formData.append("file", paymentScreenshot);
-        const uploadRes = await supabase.functions.invoke("upload-booking-document", { body: formData });
+        const uploadRes = await apiClient.functions.invoke("upload-booking-document", { body: formData });
         if (uploadRes.error) console.error("Payment screenshot upload failed:", uploadRes.error);
       }
 

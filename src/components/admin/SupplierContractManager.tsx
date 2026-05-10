@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +59,7 @@ export default function SupplierContractManager({
     if (!contractAmount || contractAmount <= 0) { toast({ title: "Enter contract amount", variant: "destructive" }); return; }
     setLoading(true);
     try {
-      const { error } = await supabase.from("supplier_contracts").insert({
+      const { error } = await apiClient.from("supplier_contracts").insert({
         supplier_id: supplierId, pilgrim_count: pilgrimCount,
         contract_amount: contractAmount, total_paid: 0, total_due: contractAmount,
       });
@@ -79,9 +79,9 @@ export default function SupplierContractManager({
     if (!selectedContractId) { toast({ title: "Select a contract", variant: "destructive" }); return; }
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) return;
-      const { error } = await supabase.from("supplier_contract_payments").insert({
+      const { error } = await apiClient.from("supplier_contract_payments").insert({
         supplier_id: supplierId, contract_id: selectedContractId, amount,
         payment_method: paymentForm.payment_method, payment_date: paymentForm.payment_date,
         note: paymentForm.note.trim() || null, wallet_account_id: paymentForm.wallet_account_id || null,

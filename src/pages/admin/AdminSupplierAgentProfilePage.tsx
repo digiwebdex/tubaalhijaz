@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { useIsViewer } from "@/components/admin/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,13 +100,13 @@ export default function AdminSupplierAgentProfilePage() {
     if (!id) return;
     setLoading(true);
     const [agRes, bRes, apRes, accRes, cRes, cpRes, itemsRes] = await Promise.all([
-      supabase.from("supplier_agents").select("*").eq("id", id).maybeSingle(),
-      supabase.from("bookings").select("*, packages(name, type, price)").eq("supplier_agent_id", id).order("created_at", { ascending: false }),
-      supabase.from("supplier_agent_payments").select("*").eq("supplier_agent_id", id).order("date", { ascending: false }),
-      supabase.from("accounts").select("id, name, type, balance").order("name"),
-      supabase.from("supplier_contracts").select("*").eq("supplier_id", id).order("created_at", { ascending: false }),
-      supabase.from("supplier_contract_payments").select("*").eq("supplier_id", id).order("payment_date", { ascending: false }),
-      supabase.from("supplier_agent_items").select("*").eq("supplier_agent_id", id).order("created_at", { ascending: true }),
+      apiClient.from("supplier_agents").select("*").eq("id", id).maybeSingle(),
+      apiClient.from("bookings").select("*, packages(name, type, price)").eq("supplier_agent_id", id).order("created_at", { ascending: false }),
+      apiClient.from("supplier_agent_payments").select("*").eq("supplier_agent_id", id).order("date", { ascending: false }),
+      apiClient.from("accounts").select("id, name, type, balance").order("name"),
+      apiClient.from("supplier_contracts").select("*").eq("supplier_id", id).order("created_at", { ascending: false }),
+      apiClient.from("supplier_contract_payments").select("*").eq("supplier_id", id).order("payment_date", { ascending: false }),
+      apiClient.from("supplier_agent_items").select("*").eq("supplier_agent_id", id).order("created_at", { ascending: true }),
     ]);
     setAgent(agRes.data);
     setBookings((bRes.data as any[]) || []);
@@ -125,11 +125,11 @@ export default function AdminSupplierAgentProfilePage() {
     if (!amount || amount <= 0) { toast({ title: "Please enter a valid amount", variant: "destructive" }); return; }
     setPaymentLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) return;
       const serviceLabel = SERVICE_TYPES.find(s => s.value === paymentForm.service_type)?.label || "";
       const combinedNotes = [serviceLabel, paymentForm.notes.trim()].filter(Boolean).join(" — ");
-      const { error: apErr } = await supabase.from("supplier_agent_payments").insert({
+      const { error: apErr } = await apiClient.from("supplier_agent_payments").insert({
         supplier_agent_id: id, amount,
         payment_method: paymentForm.payment_method,
         date: paymentForm.date,
@@ -139,7 +139,7 @@ export default function AdminSupplierAgentProfilePage() {
         recorded_by: session.user.id,
       });
       if (apErr) throw apErr;
-      const { error: expErr } = await supabase.from("expenses").insert({
+      const { error: expErr } = await apiClient.from("expenses").insert({
         title: `Supplier Payment — ${agent?.agent_name || ""}`,
         amount, category: "supplier_payment", expense_type: "supplier",
         date: paymentForm.date,
@@ -172,7 +172,7 @@ export default function AdminSupplierAgentProfilePage() {
   const handleSavePaymentEdit = async () => {
     if (!editPaymentId) return;
     const combinedNotes = [editPaymentForm.service.trim(), editPaymentForm.notes.trim()].filter(Boolean).join(" — ");
-    const { error } = await supabase.from("supplier_agent_payments").update({
+    const { error } = await apiClient.from("supplier_agent_payments").update({
       date: editPaymentForm.date || undefined,
       amount: parseFloat(editPaymentForm.amount),
       payment_method: editPaymentForm.payment_method,
@@ -185,7 +185,7 @@ export default function AdminSupplierAgentProfilePage() {
 
   const confirmDeletePayment = async () => {
     if (!deletePaymentId) return;
-    const { error } = await supabase.from("supplier_agent_payments").delete().eq("id", deletePaymentId);
+    const { error } = await apiClient.from("supplier_agent_payments").delete().eq("id", deletePaymentId);
     if (error) { toast({ title: "Failed to delete", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Payment deleted successfully" });
     setDeletePaymentId(null); loadData();

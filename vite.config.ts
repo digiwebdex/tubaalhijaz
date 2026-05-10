@@ -14,9 +14,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    alias: [
-      { find: /^@\/integrations\/supabase\/client(.*)$/, replacement: path.resolve(__dirname, "./src/lib/api.ts") },
-      { find: "@", replacement: path.resolve(__dirname, "./src") },
-    ],
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
 }));

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Package, Users, CreditCard, Check, User, FileText, Upload } from "lucide-react";
@@ -154,10 +154,10 @@ const Booking = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (session) {
         setUser(session.user);
-        const { data: profile } = await supabase
+        const { data: profile } = await apiClient
           .from("profiles")
           .select("*")
           .eq("user_id", session.user.id)
@@ -175,9 +175,9 @@ const Booking = () => {
 
       const [pkgRes, planRes] = await Promise.all([
         packageId
-          ? supabase.from("packages").select("*").eq("id", packageId).eq("is_active", true).single()
+          ? apiClient.from("packages").select("*").eq("id", packageId).eq("is_active", true).single()
           : Promise.resolve({ data: null }),
-        supabase.from("installment_plans").select("*").eq("is_active", true).order("num_installments"),
+        apiClient.from("installment_plans").select("*").eq("is_active", true).order("num_installments"),
       ]);
 
       setPkg(pkgRes.data);
@@ -197,7 +197,7 @@ const Booking = () => {
       // Fallback: try Supabase company_settings directly
       if (methods.length === 0) {
         try {
-          const { data: settingsData } = await supabase
+          const { data: settingsData } = await apiClient
             .from("company_settings")
             .select("setting_value")
             .eq("setting_key", "payment_methods")
@@ -256,7 +256,7 @@ const Booking = () => {
     if (!pkg) return;
     setSubmitting(true);
     try {
-      const response = await supabase.functions.invoke("create-guest-booking", {
+      const response = await apiClient.functions.invoke("create-guest-booking", {
         body: {
           fullName: personalInfo.fullName.trim(),
           phone: personalInfo.phone.trim(),
@@ -281,8 +281,8 @@ const Booking = () => {
           const ext = doc.file.name.split(".").pop();
           const filePath = `${userId}/${result.booking_id}/${doc.type}_${Date.now()}.${ext}`;
           
-          await supabase.storage.from("booking-documents").upload(filePath, doc.file);
-          await supabase.from("booking_documents").insert({
+          await apiClient.storage.from("booking-documents").upload(filePath, doc.file);
+          await apiClient.from("booking_documents").insert({
             booking_id: result.booking_id,
             user_id: userId,
             document_type: doc.type,

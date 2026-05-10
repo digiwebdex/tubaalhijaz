@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, X, Edit2, Trash2, Save, Filter, TrendingUp, TrendingDown, BarChart3, Search, FileDown, FileSpreadsheet } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
@@ -89,17 +89,17 @@ export default function AdminAccountingPage() {
 
   const fetchData = async () => {
     const [expRes, payRes, bkRes, custRes, pkgRes, walletRes, cashbookRes, moallemPayRes, supplierPayRes, supplierContractPayRes, commissionPayRes] = await Promise.all([
-      supabase.from("expenses").select("*").order("date", { ascending: false }),
-      supabase.from("payments").select("amount").eq("status", "completed"),
-      supabase.from("bookings").select("id, tracking_id, guest_name, user_id").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id, user_id, full_name, phone").order("full_name"),
-      supabase.from("packages").select("id, name, type").eq("is_active", true).order("name"),
-      supabase.from("accounts" as any).select("*").eq("type", "asset"),
-      supabase.from("daily_cashbook" as any).select("date, type, amount, category, payment_method").order("date", { ascending: false }),
-      supabase.from("moallem_payments").select("amount"),
-      supabase.from("supplier_agent_payments").select("amount"),
-      supabase.from("supplier_contract_payments").select("amount"),
-      supabase.from("moallem_commission_payments").select("amount"),
+      apiClient.from("expenses").select("*").order("date", { ascending: false }),
+      apiClient.from("payments").select("amount").eq("status", "completed"),
+      apiClient.from("bookings").select("id, tracking_id, guest_name, user_id").order("created_at", { ascending: false }),
+      apiClient.from("profiles").select("id, user_id, full_name, phone").order("full_name"),
+      apiClient.from("packages").select("id, name, type").eq("is_active", true).order("name"),
+      apiClient.from("accounts" as any).select("*").eq("type", "asset"),
+      apiClient.from("daily_cashbook" as any).select("date, type, amount, category, payment_method").order("date", { ascending: false }),
+      apiClient.from("moallem_payments").select("amount"),
+      apiClient.from("supplier_agent_payments").select("amount"),
+      apiClient.from("supplier_contract_payments").select("amount"),
+      apiClient.from("moallem_commission_payments").select("amount"),
     ]);
     setExpenses(expRes.data || []);
     setCustomerRevenue((payRes.data || []).reduce((s: number, p: any) => s + Number(p.amount), 0));
@@ -116,9 +116,9 @@ export default function AdminAccountingPage() {
 
   const fetchProfitViews = async () => {
     const [bpRes, ppRes, cpRes] = await Promise.all([
-      supabase.from("v_booking_profit" as any).select("*"),
-      supabase.from("v_package_profit" as any).select("*"),
-      supabase.from("v_customer_profit" as any).select("*"),
+      apiClient.from("v_booking_profit" as any).select("*"),
+      apiClient.from("v_package_profit" as any).select("*"),
+      apiClient.from("v_customer_profit" as any).select("*"),
     ]);
     setBookingProfit((bpRes.data as any[]) || []);
     setPackageProfit((ppRes.data as any[]) || []);
@@ -139,7 +139,7 @@ export default function AdminAccountingPage() {
       package_id: form.category === "package" && form.package_id ? form.package_id : null,
       wallet_account_id: form.wallet_account_id || null,
     };
-    const { error } = await supabase.from("expenses").insert(payload);
+    const { error } = await apiClient.from("expenses").insert(payload);
     if (error) {
       if (error.message?.includes("Insufficient wallet balance")) toast.error("Insufficient wallet balance");
       else toast.error(error.message);
@@ -165,7 +165,7 @@ export default function AdminAccountingPage() {
       package_id: editForm.category === "package" && editForm.package_id ? editForm.package_id : null,
       wallet_account_id: editForm.wallet_account_id || null,
     };
-    const { error } = await supabase.from("expenses").update(payload).eq("id", editingId);
+    const { error } = await apiClient.from("expenses").update(payload).eq("id", editingId);
     if (error) { toast.error(error.message); return; }
     toast.success("Expense updated"); setEditingId(null);
     fetchData(); fetchProfitViews();
@@ -173,7 +173,7 @@ export default function AdminAccountingPage() {
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("expenses").delete().eq("id", deleteId);
+    const { error } = await apiClient.from("expenses").delete().eq("id", deleteId);
     if (error) { toast.error(error.message); return; }
     toast.success("Expense deleted"); setDeleteId(null);
     fetchData(); fetchProfitViews();

@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 
 const TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes of inactivity
@@ -10,7 +10,7 @@ export const useSessionTimeout = () => {
 
   const handleTimeout = useCallback(async () => {
     toast.warning("Session expired due to inactivity. Please log in again.");
-    await supabase.auth.signOut();
+    await apiClient.auth.signOut();
     navigate("/auth");
   }, [navigate]);
 

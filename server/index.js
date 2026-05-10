@@ -766,7 +766,7 @@ app.post('/api/backup/delete', authenticate, requireRole('admin'), async (req, r
 // SPECIAL ROUTES
 // =============================================
 
-// Bookings with joins (like supabase select with relations)
+// Bookings with joins (nested join (legacy comment))
 app.get('/api/bookings-full', authenticate, requireRole('admin'), async (req, res) => {
   try {
     const result = await query(`
@@ -777,7 +777,7 @@ app.get('/api/bookings-full', authenticate, requireRole('admin'), async (req, re
       LEFT JOIN moallems m ON b.moallem_id = m.id
       ORDER BY b.created_at DESC
     `);
-    // Format to match supabase nested structure
+    // Format nested join structure
     const bookings = result.rows.map(row => ({
       ...row,
       packages: { name: row.package_name, type: row.package_type, duration_days: row.duration_days, price: row.package_price },
@@ -1326,114 +1326,89 @@ app.post('/api/send-otp', async (req, res) => {
 
         const guestBooking = guestResult.rows[0];
 
-        // Use Supabase admin API to create auth user
-        const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-        const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        // Native auth (no Supabase) — create user with bcrypt + issue JWTs
+        const bcrypt = require('bcryptjs');
+        const jwt = require('jsonwebtoken');
+        const { v4: uuidv4 } = require('uuid');
 
-        if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
-          const { createClient } = require('@supabase/supabase-js');
-          const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+        const issueTokens = (uid, email) => {
+          const accessToken = jwt.sign({ userId: uid, email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
+          const refreshToken = jwt.sign({ userId: uid }, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' });
+          return { accessToken, refreshToken };
+        };
 
-          const tempEmail = `${sanitizedPhone.replace(/\+/g, '')}@phone.triptastic.com.bd`;
-          const tempPassword = require('uuid').v4() + 'Aa1!';
+        const tempEmail = guestBooking.guest_email || `${sanitizedPhone.replace(/\+/g, '')}@phone.tubaalhijaz.com`;
+        const tempPassword = uuidv4() + 'Aa1!';
+        const passwordHash = await bcrypt.hash(tempPassword, 10);
 
-          const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-            email: guestBooking.guest_email || tempEmail,
-            password: tempPassword,
-            email_confirm: true,
-            user_metadata: { full_name: guestBooking.guest_name || '', phone: sanitizedPhone },
-          });
-
-          if (createError) {
-            if (createError.message?.includes('already') || createError.message?.includes('exists')) {
-              const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-              const existingUser = existingUsers?.users?.find(u => u.email === (guestBooking.guest_email || tempEmail));
-              if (existingUser) {
-                userId = existingUser.id;
-                // Upsert profile
-                const existingProfile = await query('SELECT id FROM profiles WHERE user_id = $1', [userId]);
-                if (existingProfile.rows[0]) {
-                  await query('UPDATE profiles SET phone = $1, full_name = COALESCE(full_name, $2) WHERE user_id = $3', [sanitizedPhone, guestBooking.guest_name || '', userId]);
-                } else {
-                  await query('INSERT INTO profiles (user_id, phone, full_name, email) VALUES ($1, $2, $3, $4)', [userId, sanitizedPhone, guestBooking.guest_name || '', guestBooking.guest_email || null]);
-                }
-              }
-            }
-          } else if (newUser?.user) {
-            userId = newUser.user.id;
-            await query('INSERT INTO profiles (user_id, full_name, phone, email, address, passport_number) VALUES ($1, $2, $3, $4, $5, $6)',
-              [userId, guestBooking.guest_name || '', sanitizedPhone, guestBooking.guest_email || null, guestBooking.guest_address || null, guestBooking.guest_passport || null]);
-            await query('INSERT INTO user_roles (user_id, role) VALUES ($1, $2)', [userId, 'user']);
-          }
-
-          // Link all guest bookings to this user
-          if (userId) {
-            await query('UPDATE bookings SET user_id = $1 WHERE guest_phone = $2 AND user_id IS NULL', [userId, sanitizedPhone]);
-            // Link payments
-            const userBookings = await query('SELECT id FROM bookings WHERE user_id = $1', [userId]);
-            if (userBookings.rows.length) {
-              const bookingIds = userBookings.rows.map(b => b.id);
-              await query(`UPDATE payments SET user_id = $1 WHERE booking_id = ANY($2) AND user_id = '00000000-0000-0000-0000-000000000000'`, [userId, bookingIds]);
+        try {
+          const created = await query(
+            'INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, email',
+            [tempEmail.toLowerCase(), passwordHash, guestBooking.guest_name || '']
+          );
+          userId = created.rows[0].id;
+          await query(
+            'INSERT INTO profiles (user_id, full_name, phone, email, address, passport_number) VALUES ($1, $2, $3, $4, $5, $6)',
+            [userId, guestBooking.guest_name || '', sanitizedPhone, tempEmail, guestBooking.guest_address || null, guestBooking.guest_passport || null]
+          );
+          await query('INSERT INTO user_roles (user_id, role) VALUES ($1, $2) ON CONFLICT DO NOTHING', [userId, 'user']);
+        } catch (e) {
+          // user already exists — look up id
+          const existing = await query('SELECT id FROM users WHERE email = $1', [tempEmail.toLowerCase()]);
+          if (existing.rows[0]) {
+            userId = existing.rows[0].id;
+            const profExists = await query('SELECT id FROM profiles WHERE user_id = $1', [userId]);
+            if (profExists.rows[0]) {
+              await query('UPDATE profiles SET phone = $1, full_name = COALESCE(full_name, $2) WHERE user_id = $3', [sanitizedPhone, guestBooking.guest_name || '', userId]);
+            } else {
+              await query('INSERT INTO profiles (user_id, phone, full_name, email) VALUES ($1, $2, $3, $4)', [userId, sanitizedPhone, guestBooking.guest_name || '', tempEmail]);
             }
           }
-
-          if (!userId) {
-            return res.status(500).json({ error: 'অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।' });
-          }
-
-          // Generate magic link tokens
-          const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
-          if (!authUser?.user?.email) {
-            return res.status(500).json({ error: 'User account issue. Please contact support.' });
-          }
-
-          const { data: magicLink, error: magicError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'magiclink',
-            email: authUser.user.email,
-          });
-
-          if (magicError) {
-            return res.status(500).json({ error: 'Authentication failed' });
-          }
-
-          return res.json({
-            success: true,
-            access_token: magicLink.properties?.access_token,
-            refresh_token: magicLink.properties?.refresh_token,
-            user_id: userId,
-          });
-        } else {
-          return res.status(500).json({ error: 'Auth service not configured' });
-        }
-      } else {
-        // Existing user - generate magic link
-        const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-        const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-          return res.status(500).json({ error: 'Auth service not configured' });
-        }
-        const { createClient } = require('@supabase/supabase-js');
-        const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
-        if (!authUser?.user?.email) {
-          return res.status(500).json({ error: 'User account issue.' });
         }
 
-        const { data: magicLink, error: magicError } = await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: authUser.user.email,
-        });
-
-        if (magicError) {
-          return res.status(500).json({ error: 'Authentication failed' });
+        if (!userId) {
+          return res.status(500).json({ error: 'অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।' });
         }
+
+        // Link guest bookings + payments to this user
+        await query('UPDATE bookings SET user_id = $1 WHERE guest_phone = $2 AND user_id IS NULL', [userId, sanitizedPhone]);
+        const userBookings = await query('SELECT id FROM bookings WHERE user_id = $1', [userId]);
+        if (userBookings.rows.length) {
+          const bookingIds = userBookings.rows.map(b => b.id);
+          await query(`UPDATE payments SET user_id = $1 WHERE booking_id = ANY($2) AND user_id = '00000000-0000-0000-0000-000000000000'`, [userId, bookingIds]);
+        }
+
+        const { accessToken, refreshToken } = issueTokens(userId, tempEmail);
+        await query(
+          "INSERT INTO sessions (user_id, refresh_token, expires_at) VALUES ($1, $2, now() + interval '7 days')",
+          [userId, refreshToken]
+        );
 
         return res.json({
           success: true,
-          access_token: magicLink.properties?.access_token,
-          refresh_token: magicLink.properties?.refresh_token,
+          access_token: accessToken,
+          refresh_token: refreshToken,
           user_id: userId,
+        });
+      } else {
+        // Existing user — issue fresh JWT pair
+        const jwt = require('jsonwebtoken');
+        const userRow = await query('SELECT id, email FROM users WHERE id = $1', [userId]);
+        if (!userRow.rows[0]) {
+          return res.status(500).json({ error: 'User account issue.' });
+        }
+        const u = userRow.rows[0];
+        const accessToken = jwt.sign({ userId: u.id, email: u.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
+        const refreshToken = jwt.sign({ userId: u.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' });
+        await query(
+          "INSERT INTO sessions (user_id, refresh_token, expires_at) VALUES ($1, $2, now() + interval '7 days')",
+          [u.id, refreshToken]
+        );
+        return res.json({
+          success: true,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          user_id: u.id,
         });
       }
     }

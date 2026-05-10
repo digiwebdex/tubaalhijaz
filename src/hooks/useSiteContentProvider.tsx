@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 
 interface SiteContentContextType {
   content: Record<string, any>;
@@ -16,7 +16,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useQuery({
     queryKey: ["site_content_all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from("site_content")
         .select("*")
         .order("section_key");

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { FileText, Download, Eye, X, Loader2, Search } from "lucide-react";
 
 interface Props {
@@ -26,7 +26,7 @@ const AdminDocumentViewer = ({ bookings }: Props) => {
 
   const fetchDocuments = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("booking_documents")
       .select("*, bookings(tracking_id), profiles:user_id(full_name)")
       .order("created_at", { ascending: false });
@@ -35,7 +35,7 @@ const AdminDocumentViewer = ({ bookings }: Props) => {
   };
 
   const getSignedUrl = async (filePath: string) => {
-    const { data, error } = await supabase.storage
+    const { data, error } = await apiClient.storage
       .from("booking-documents")
       .createSignedUrl(filePath, 300);
     if (error) return null;

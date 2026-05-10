@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 
 export interface CurrencyRate {
   sar_to_bdt: number;
@@ -14,7 +14,7 @@ export function useCurrencyRate() {
 
   useEffect(() => {
     let mounted = true;
-    supabase
+    apiClient
       .from("company_settings")
       .select("setting_value")
       .eq("setting_key", "currency_rate")

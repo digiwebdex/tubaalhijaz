@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Search, Globe, FileText, Code, RefreshCw, ExternalLink, CheckCircle, AlertTriangle } from "lucide-react";
 
@@ -100,7 +100,7 @@ export default function AdminSeoPage() {
 
   const loadSettings = async () => {
     try {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("site_content")
         .select("content")
         .eq("section_key", "seo_settings")
@@ -119,19 +119,19 @@ export default function AdminSeoPage() {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      const { data: existing } = await supabase
+      const { data: existing } = await apiClient
         .from("site_content")
         .select("id")
         .eq("section_key", "seo_settings")
         .maybeSingle();
 
       if (existing) {
-        await supabase
+        await apiClient
           .from("site_content")
           .update({ content: settings as unknown as Record<string, unknown>, updated_at: new Date().toISOString() })
           .eq("section_key", "seo_settings");
       } else {
-        await supabase
+        await apiClient
           .from("site_content")
           .insert({ section_key: "seo_settings", content: settings as unknown as Record<string, unknown> });
       }

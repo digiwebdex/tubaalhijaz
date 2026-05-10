@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 export interface CateringPlan {
@@ -70,11 +70,11 @@ export default function CateringOrderDialog({ open, onOpenChange, plan }: Props)
         notes: notes || null,
         status: "pending",
       };
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (apiClient as any)
         .from("catering_orders").insert(payload).select().single();
       if (error) throw error;
       try {
-        await (supabase as any).functions.invoke("send-notification", {
+        await (apiClient as any).functions.invoke("send-notification", {
           body: {
             event_type: "catering_order",
             subject: `New Catering Order — ${plan?.name}`,

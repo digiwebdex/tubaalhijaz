@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Star, MapPin, Ruler, Users, Wifi, Car, UtensilsCrossed, Dumbbell, ArrowLeft, Calendar } from "lucide-react";
@@ -30,16 +30,16 @@ const HotelDetail = () => {
   const [booking, setBooking] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setUser(s?.user || null));
+    apiClient.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((_, s) => setUser(s?.user || null));
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     const fetch = async () => {
       const [hotelRes, roomsRes] = await Promise.all([
-        supabase.from("hotels").select("*").eq("id", id).maybeSingle(),
-        supabase.from("hotel_rooms").select("*").eq("hotel_id", id).eq("is_available", true).order("price_per_night"),
+        apiClient.from("hotels").select("*").eq("id", id).maybeSingle(),
+        apiClient.from("hotel_rooms").select("*").eq("hotel_id", id).eq("is_available", true).order("price_per_night"),
       ]);
       setHotel(hotelRes.data);
       setRooms(roomsRes.data || []);
@@ -60,7 +60,7 @@ const HotelDetail = () => {
       return;
     }
     setBooking(true);
-    const { error } = await supabase.from("hotel_bookings").insert({
+    const { error } = await apiClient.from("hotel_bookings").insert({
       user_id: user.id, hotel_id: hotel.id, room_id: selectedRoom.id,
       check_in: checkIn, check_out: checkOut, guests, total_price: totalPrice,
     });

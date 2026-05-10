@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, Trash2, Edit2, Save, X, FileDown, FileSpreadsheet, TrendingUp, TrendingDown } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
@@ -69,8 +69,8 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
 
   const fetchData = async () => {
     const [entryRes, walletRes] = await Promise.all([
-      supabase.from("daily_cashbook" as any).select("*").order("created_at", { ascending: false }),
-      supabase.from("accounts" as any).select("*").eq("type", "asset"),
+      apiClient.from("daily_cashbook" as any).select("*").order("created_at", { ascending: false }),
+      apiClient.from("accounts" as any).select("*").eq("type", "asset"),
     ]);
     setEntries((entryRes.data as any[]) || []);
     setWalletAccounts((walletRes.data as any[]) || []);
@@ -92,7 +92,7 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
       notes: form.notes.trim() || null,
       date: form.date,
     };
-    const { error } = await supabase.from("daily_cashbook" as any).insert(payload);
+    const { error } = await apiClient.from("daily_cashbook" as any).insert(payload);
     if (error) { toast.error(error.message); return; }
     toast.success(form.type === "income" ? "Income recorded" : "Expense recorded");
     setShowForm(false);
@@ -112,7 +112,7 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
 
   const saveEdit = async () => {
     if (!editingId) return;
-    const { error } = await supabase.from("daily_cashbook" as any).update({
+    const { error } = await apiClient.from("daily_cashbook" as any).update({
       type: editForm.type, description: editForm.description, amount: parseFloat(editForm.amount),
       category: editForm.category, wallet_account_id: editForm.wallet_account_id || null,
       payment_method: editForm.payment_method, notes: editForm.notes || null, date: editForm.date,
@@ -126,7 +126,7 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("daily_cashbook" as any).delete().eq("id", deleteId);
+    const { error } = await apiClient.from("daily_cashbook" as any).delete().eq("id", deleteId);
     if (error) { toast.error(error.message); return; }
     toast.success("Deleted successfully");
     setDeleteId(null);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +71,7 @@ export default function DriverInfoEditor({ bookingId, initial, onSaved }: Props)
     const message = buildMessage(booking.tracking_id || "");
     const subject = `🚗 Driver Assigned — ${booking.tracking_id || ""}`;
     try {
-      await supabase.functions.invoke("send-notification", {
+      await apiClient.functions.invoke("send-notification", {
         body: {
           type: "custom",
           channels: ["email", "sms"],
@@ -87,7 +87,7 @@ export default function DriverInfoEditor({ bookingId, initial, onSaved }: Props)
   };
 
   const openWhatsApp = async () => {
-    const { data: b } = await supabase
+    const { data: b } = await apiClient
       .from("bookings")
       .select("tracking_id, customer_phone, profiles:user_id(phone)")
       .eq("id", bookingId)
@@ -105,7 +105,7 @@ export default function DriverInfoEditor({ bookingId, initial, onSaved }: Props)
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await apiClient
       .from("bookings")
       .update({
         driver_name: form.driver_name || null,

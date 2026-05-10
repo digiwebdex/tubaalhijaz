@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { useIsViewer, useCanModifyFinancials } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -64,10 +64,10 @@ export default function AdminRefundsPage() {
   const fetchAll = async () => {
     setLoading(true);
     const [refRes, polRes, bkRes, walRes] = await Promise.all([
-      supabase.from("refunds").select("*, bookings(tracking_id, guest_name, total_amount, paid_amount, status, packages(name)), cancellation_policies(name)").order("created_at", { ascending: false }),
-      supabase.from("cancellation_policies").select("*").eq("is_active", true).order("name", { ascending: true }),
-      supabase.from("bookings").select("id, tracking_id, guest_name, total_amount, paid_amount, status, packages(name)").order("created_at", { ascending: false }),
-      supabase.from("accounts").select("*").eq("type", "asset").order("name", { ascending: true }),
+      apiClient.from("refunds").select("*, bookings(tracking_id, guest_name, total_amount, paid_amount, status, packages(name)), cancellation_policies(name)").order("created_at", { ascending: false }),
+      apiClient.from("cancellation_policies").select("*").eq("is_active", true).order("name", { ascending: true }),
+      apiClient.from("bookings").select("id, tracking_id, guest_name, total_amount, paid_amount, status, packages(name)").order("created_at", { ascending: false }),
+      apiClient.from("accounts").select("*").eq("type", "asset").order("name", { ascending: true }),
     ]);
     setRefunds(refRes.data || []);
     setPolicies(polRes.data || []);
@@ -110,7 +110,7 @@ export default function AdminRefundsPage() {
     if (!selectedBookingId) { toast.error("বুকিং নির্বাচন করুন"); return; }
     if (refundForm.refund_amount <= 0) { toast.error("রিফান্ড পরিমাণ ০ এর বেশি হতে হবে"); return; }
 
-    const { error } = await supabase.from("refunds").insert({
+    const { error } = await apiClient.from("refunds").insert({
       booking_id: selectedBookingId,
       policy_id: selectedPolicyId || null,
       original_amount: refundForm.original_amount,
@@ -130,7 +130,7 @@ export default function AdminRefundsPage() {
   };
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase.from("refunds").update({
+    const { error } = await apiClient.from("refunds").update({
       status: newStatus,
       ...(newStatus === "processed" ? { processed_at: new Date().toISOString() } : {}),
     }).eq("id", id);
@@ -141,7 +141,7 @@ export default function AdminRefundsPage() {
 
   const handleSavePolicy = async () => {
     if (!policyForm.name) { toast.error("নাম দিন"); return; }
-    const { error } = await supabase.from("cancellation_policies").insert(policyForm);
+    const { error } = await apiClient.from("cancellation_policies").insert(policyForm);
     if (error) { toast.error(error.message); return; }
     toast.success("পলিসি তৈরি হয়েছে");
     setPolicyForm({ name: "", description: "", refund_type: "percentage", refund_value: 0, min_days_before_departure: 0, is_default: false });

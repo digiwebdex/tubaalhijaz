@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ export default function AdminChartOfAccountsPage() {
   const [loading, setLoading] = useState(false);
 
   const fetchAccounts = async () => {
-    const { data } = await supabase.from("accounts" as any).select("*").order("type").order("name");
+    const { data } = await apiClient.from("accounts" as any).select("*").order("type").order("name");
     setAccounts((data as any[]) || []);
   };
 
@@ -36,7 +36,7 @@ export default function AdminChartOfAccountsPage() {
       toast.error("Account already exists"); return;
     }
     setLoading(true);
-    const { error } = await supabase.from("accounts" as any).insert({ name: newName.trim(), type: newType, balance: 0 } as any);
+    const { error } = await apiClient.from("accounts" as any).insert({ name: newName.trim(), type: newType, balance: 0 } as any);
     setLoading(false);
     if (error) { toast.error("Failed to add account"); return; }
     toast.success("Account added");
@@ -46,7 +46,7 @@ export default function AdminChartOfAccountsPage() {
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete account "${name}"?`)) return;
-    const { error } = await supabase.from("accounts" as any).delete().eq("id", id);
+    const { error } = await apiClient.from("accounts" as any).delete().eq("id", id);
     if (error) { toast.error("Failed to delete"); return; }
     toast.success("Account deleted");
     fetchAccounts();

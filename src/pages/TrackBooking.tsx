@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { Search, Package, CheckCircle2, Clock, Plane, FileCheck, Loader2, History, X, User, ShieldCheck, LogIn } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -52,15 +52,15 @@ const TrackBooking = () => {
   ];
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setUser(s?.user || null));
+    apiClient.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((_, s) => setUser(s?.user || null));
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user) { setUserBookings([]); return; }
     setLoadingUser(true);
-    supabase
+    apiClient
       .from("bookings")
       .select("tracking_id, status, packages(name), created_at")
       .eq("user_id", user.id)
@@ -83,7 +83,7 @@ const TrackBooking = () => {
     let bookingData: any = null;
 
     if (isPhoneNumber(rawInput)) {
-      const { data, error } = await supabase.functions.invoke("track-booking", {
+      const { data, error } = await apiClient.functions.invoke("track-booking", {
         body: { phone: rawInput },
       });
       if (!error && data?.booking) {
@@ -92,7 +92,7 @@ const TrackBooking = () => {
     } else {
       const id = rawInput.toUpperCase();
       setTrackingId(id);
-      const { data, error } = await supabase.functions.invoke("track-booking", {
+      const { data, error } = await apiClient.functions.invoke("track-booking", {
         body: { tracking_id: id },
       });
       if (!error && data?.booking) {

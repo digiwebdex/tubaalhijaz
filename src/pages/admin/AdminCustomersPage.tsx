@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import {
   Users, Edit2, Save, X, Search, Plus, Trash2, Eye, ChevronLeft, ChevronRight, Pencil, Loader2, FileDown, FileSpreadsheet
@@ -58,9 +58,9 @@ export default function AdminCustomersPage() {
   const fetchData = async () => {
     setLoading(true);
     const [pRes, bRes, payRes] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("bookings").select("id, user_id, guest_phone, guest_name, total_amount, paid_amount, due_amount, num_travelers, status"),
-      supabase.from("payments").select("id, user_id, amount, status, booking_id").eq("status", "completed"),
+      apiClient.from("profiles").select("*").order("created_at", { ascending: false }),
+      apiClient.from("bookings").select("id, user_id, guest_phone, guest_name, total_amount, paid_amount, due_amount, num_travelers, status"),
+      apiClient.from("payments").select("id, user_id, amount, status, booking_id").eq("status", "completed"),
     ]);
     setCustomers(pRes.data || []);
     setBookings(bRes.data || []);
@@ -136,7 +136,7 @@ export default function AdminCustomersPage() {
       if (phoneErr) { toast.error(phoneErr); return; }
     }
     const normalizedPhone = editForm.phone?.trim() ? normalizePhone(editForm.phone) : null;
-    const { error } = await supabase.from("profiles").update({
+    const { error } = await apiClient.from("profiles").update({
       full_name: editForm.full_name || null, phone: normalizedPhone,
       email: editForm.email || null, address: editForm.address || null,
       passport_number: editForm.passport_number || null, nid_number: editForm.nid_number || null,
@@ -150,7 +150,7 @@ export default function AdminCustomersPage() {
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("profiles").delete().eq("id", deleteId);
+    const { error } = await apiClient.from("profiles").delete().eq("id", deleteId);
     if (error) { toast.error(error.message); return; }
     toast.success("Customer deleted successfully");
     setDeleteId(null); fetchData();
@@ -163,13 +163,13 @@ export default function AdminCustomersPage() {
     if (phoneErr) { toast.error(phoneErr); return; }
     setAddLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) { toast.error("Not authenticated"); return; }
       const cleanPhone = addForm.phone.trim().replace(/[^\d+]/g, "");
-      const { data: existing } = await supabase.from("profiles").select("id").eq("phone", cleanPhone).maybeSingle();
+      const { data: existing } = await apiClient.from("profiles").select("id").eq("phone", cleanPhone).maybeSingle();
       if (existing) { toast.error("A customer with this phone number already exists"); setAddLoading(false); return; }
       const newUserId = crypto.randomUUID();
-      const { error } = await supabase.from("profiles").insert({
+      const { error } = await apiClient.from("profiles").insert({
         user_id: newUserId, full_name: addForm.full_name.trim(), phone: cleanPhone,
         email: addForm.email.trim() || null, address: addForm.address.trim() || null,
         passport_number: addForm.passport_number.trim() || null, nid_number: addForm.nid_number.trim() || null,

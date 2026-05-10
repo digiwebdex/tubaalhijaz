@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,15 +39,15 @@ export default function AdminDueAlertsPage() {
   const fetchData = async () => {
     setLoading(true);
     const [paymentsRes, profilesRes, bookingsRes] = await Promise.all([
-      supabase
+      apiClient
         .from("payments")
         .select("*, bookings(tracking_id, user_id, guest_name, guest_phone, packages(name))")
         .eq("status", "pending")
         .not("due_date", "is", null)
         .order("due_date", { ascending: true }),
-      supabase.from("profiles").select("user_id, full_name, phone"),
+      apiClient.from("profiles").select("user_id, full_name, phone"),
       // Also fetch bookings with outstanding dues but no pending payment records
-      supabase
+      apiClient
         .from("bookings")
         .select("id, tracking_id, user_id, guest_name, guest_phone, total_amount, paid_amount, due_amount, status, packages(name)")
         .gt("due_amount", 0)
@@ -128,7 +128,7 @@ export default function AdminDueAlertsPage() {
   };
 
   const markPaid = async (id: string) => {
-    const { error } = await supabase.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", id);
+    const { error } = await apiClient.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Payment marked as completed");
     fetchData();
@@ -155,7 +155,7 @@ export default function AdminDueAlertsPage() {
     if (!phone) { toast.error("No phone number found"); return; }
     setSendingId(p.id);
     try {
-      const { data, error } = await supabase.functions.invoke("send-notification", {
+      const { data, error } = await apiClient.functions.invoke("send-notification", {
         body: {
           type: "payment_reminder",
           channels: ["sms"],
@@ -179,7 +179,7 @@ export default function AdminDueAlertsPage() {
   const sendEmailReminder = async (p: PaymentRow) => {
     setSendingId(p.id);
     try {
-      const { data, error } = await supabase.functions.invoke("send-notification", {
+      const { data, error } = await apiClient.functions.invoke("send-notification", {
         body: {
           type: "payment_reminder",
           channels: ["email"],

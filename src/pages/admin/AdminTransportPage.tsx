@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, Edit2, Trash2, Save, X } from "lucide-react";
 import { useIsViewer } from "@/components/admin/AdminLayout";
@@ -23,8 +23,8 @@ export default function AdminTransportPage() {
 
   const fetchAll = async () => {
     const [s, b] = await Promise.all([
-      supabase.from("transport_services").select("*").order("display_order"),
-      supabase.from("transport_bookings").select("*").order("created_at", { ascending: false }),
+      apiClient.from("transport_services").select("*").order("display_order"),
+      apiClient.from("transport_bookings").select("*").order("created_at", { ascending: false }),
     ]);
     setServices(s.data || []);
     setBookings(b.data || []);
@@ -40,8 +40,8 @@ export default function AdminTransportPage() {
       display_order: Number(form.display_order) || 0,
     };
     const res = editingId
-      ? await supabase.from("transport_services").update(payload).eq("id", editingId)
-      : await supabase.from("transport_services").insert(payload);
+      ? await apiClient.from("transport_services").update(payload).eq("id", editingId)
+      : await apiClient.from("transport_services").insert(payload);
     if (res.error) return toast.error(res.error.message);
     toast.success("Saved");
     setShowForm(false); setForm(EMPTY); setEditingId(null);
@@ -50,13 +50,13 @@ export default function AdminTransportPage() {
 
   const remove = async (id: string) => {
     if (!confirm("Delete this transport service?")) return;
-    const { error } = await supabase.from("transport_services").delete().eq("id", id);
+    const { error } = await apiClient.from("transport_services").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Deleted"); fetchAll();
   };
 
   const updateBookingStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("transport_bookings").update({ status }).eq("id", id);
+    const { error } = await apiClient.from("transport_bookings").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Updated"); fetchAll();
   };

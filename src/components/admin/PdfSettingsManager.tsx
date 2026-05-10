@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Save, RotateCcw, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ export default function PdfSettingsManager() {
   const loadSettings = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("company_settings")
         .select("setting_value")
         .eq("setting_key", "pdf_company")
@@ -51,14 +51,14 @@ export default function PdfSettingsManager() {
     setSaving(true);
     try {
       // Check if setting exists
-      const { data: existing } = await supabase
+      const { data: existing } = await apiClient
         .from("company_settings")
         .select("id")
         .eq("setting_key", "pdf_company")
         .maybeSingle();
 
       if (existing?.id) {
-        await supabase
+        await apiClient
           .from("company_settings")
           .update({
             setting_value: config as any,
@@ -66,7 +66,7 @@ export default function PdfSettingsManager() {
           })
           .eq("id", existing.id);
       } else {
-        await supabase
+        await apiClient
           .from("company_settings")
           .insert({
             setting_key: "pdf_company",

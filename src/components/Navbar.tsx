@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Phone, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/tuba-logo.png";
 import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
@@ -33,10 +33,10 @@ const Navbar = () => {
   const navLinks = allNavLinks.filter((link) => menuVisibility[link.key] !== false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = apiClient.auth.onAuthStateChange((_, session) => {
       setUser(session?.user || null);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
+    apiClient.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
     return () => subscription.unsubscribe();
   }, []);
 

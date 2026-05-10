@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Upload, X, Loader2 } from "lucide-react";
 
@@ -25,10 +25,10 @@ export default function BannerImageUpload({ onUpload, currentUrl, label = "Uploa
     const ext = file.name.split(".").pop();
     const path = `banners/${Date.now()}.${ext}`;
 
-    const { error } = await supabase.storage.from("company-assets").upload(path, file, { upsert: true });
+    const { error } = await apiClient.storage.from("company-assets").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); setUploading(false); return; }
 
-    const { data: { publicUrl } } = supabase.storage.from("company-assets").getPublicUrl(path);
+    const { data: { publicUrl } } = apiClient.storage.from("company-assets").getPublicUrl(path);
     setPreview(publicUrl);
     onUpload(publicUrl);
     setUploading(false);

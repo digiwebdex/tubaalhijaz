@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -72,7 +72,7 @@ export default function AdminPaymentMethodsPage() {
 
   const loadSettings = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("company_settings")
       .select("setting_value")
       .eq("setting_key", "payment_methods")
@@ -91,7 +91,7 @@ export default function AdminPaymentMethodsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: existing } = await supabase
+    const { data: existing } = await apiClient
       .from("company_settings")
       .select("id")
       .eq("setting_key", "payment_methods")
@@ -100,9 +100,9 @@ export default function AdminPaymentMethodsPage() {
     const payload = { setting_key: "payment_methods", setting_value: methods as unknown as Record<string, unknown> };
 
     if (existing) {
-      await supabase.from("company_settings").update(payload).eq("id", existing.id);
+      await apiClient.from("company_settings").update(payload).eq("id", existing.id);
     } else {
-      await supabase.from("company_settings").insert(payload);
+      await apiClient.from("company_settings").insert(payload);
     }
     toast.success("Payment methods saved successfully");
     setSaving(false);

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Search, Eye, Download, X } from "lucide-react";
 import { useIsViewer } from "@/components/admin/AdminLayout";
@@ -27,7 +27,7 @@ export default function AdminUmrahOrdersPage() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from("umrah_orders")
       .select("*")
       .order("created_at", { ascending: false });
@@ -55,7 +55,7 @@ export default function AdminUmrahOrdersPage() {
   }, [rows, q, statusFilter, tierFilter]);
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("umrah_orders").update({ status }).eq("id", id);
+    const { error } = await apiClient.from("umrah_orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Status updated");
     fetchAll();
@@ -64,7 +64,7 @@ export default function AdminUmrahOrdersPage() {
 
   const saveNotes = async () => {
     if (!active) return;
-    const { error } = await supabase.from("umrah_orders").update({ internal_notes: notes }).eq("id", active.id);
+    const { error } = await apiClient.from("umrah_orders").update({ internal_notes: notes }).eq("id", active.id);
     if (error) return toast.error(error.message);
     toast.success("Notes saved");
     setActive({ ...active, internal_notes: notes });

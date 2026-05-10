@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { Star, MapPin, Ruler } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -17,7 +17,7 @@ const Hotels = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("hotels")
         .select("*, hotel_rooms(id, price_per_night)")
         .eq("is_active", true)

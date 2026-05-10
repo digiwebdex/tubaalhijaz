@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,11 +64,11 @@ export default function SupplierItemsManager({ supplierId, items, isViewer, onRe
     };
 
     if (editId) {
-      const { error } = await supabase.from("supplier_agent_items").update(payload).eq("id", editId);
+      const { error } = await apiClient.from("supplier_agent_items").update(payload).eq("id", editId);
       if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); setSaving(false); return; }
       toast({ title: "Item updated" });
     } else {
-      const { error } = await supabase.from("supplier_agent_items").insert(payload);
+      const { error } = await apiClient.from("supplier_agent_items").insert(payload);
       if (error) { toast({ title: "Creation failed", description: error.message, variant: "destructive" }); setSaving(false); return; }
       toast({ title: "Item added" });
     }
@@ -91,7 +91,7 @@ export default function SupplierItemsManager({ supplierId, items, isViewer, onRe
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("supplier_agent_items").delete().eq("id", deleteId);
+    const { error } = await apiClient.from("supplier_agent_items").delete().eq("id", deleteId);
     if (error) { toast({ title: "Delete failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Item deleted" });
     setDeleteId(null);

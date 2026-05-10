@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,7 +41,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
       const bPayments = payments.filter((p) => p.booking_id === b.id);
       const [company, bookingRes] = await Promise.all([
         getCompanyInfo(),
-        supabase
+        apiClient
           .from("bookings")
           .select("*, packages(name, type, duration_days, start_date, price), booking_members(full_name, passport_number, selling_price, discount, final_price, package_id, packages(name))")
           .eq("id", b.id)
@@ -84,7 +84,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
 
   const handleViewDocument = async (doc: any) => {
     try {
-      const { data } = await supabase.storage.from("booking-documents").createSignedUrl(doc.file_path, 300);
+      const { data } = await apiClient.storage.from("booking-documents").createSignedUrl(doc.file_path, 300);
       if (data?.signedUrl) window.open(data.signedUrl, "_blank");
       else toast.error("Could not generate URL");
     } catch { toast.error("Failed to open document"); }
@@ -100,12 +100,12 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
       const customerPhone = normalizePhone(customer.phone);
 
       // Fetch bookings by user_id
-      const { data: byUserId } = await supabase.from("bookings").select("*, packages(name, type, price, duration_days, start_date)").eq("user_id", customer.user_id);
+      const { data: byUserId } = await apiClient.from("bookings").select("*, packages(name, type, price, duration_days, start_date)").eq("user_id", customer.user_id);
 
       // Also fetch bookings by guest_phone if customer has a phone
       let byPhone: any[] = [];
       if (customerPhone) {
-        const { data: phoneBookings } = await supabase.from("bookings").select("*, packages(name, type, price, duration_days, start_date)").ilike("guest_phone", `%${customerPhone}`);
+        const { data: phoneBookings } = await apiClient.from("bookings").select("*, packages(name, type, price, duration_days, start_date)").ilike("guest_phone", `%${customerPhone}`);
         byPhone = phoneBookings || [];
       }
 
@@ -121,10 +121,10 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
       const bIds = allBookings.map((b: any) => b.id);
 
       // Fetch payments by user_id + by booking_ids
-      const { data: payByUser } = await supabase.from("payments").select("*, bookings(tracking_id)").eq("user_id", customer.user_id).order("due_date", { ascending: true });
+      const { data: payByUser } = await apiClient.from("payments").select("*, bookings(tracking_id)").eq("user_id", customer.user_id).order("due_date", { ascending: true });
       let payByBooking: any[] = [];
       if (bIds.length > 0) {
-        const { data: pb } = await supabase.from("payments").select("*, bookings(tracking_id)").in("booking_id", bIds).order("due_date", { ascending: true });
+        const { data: pb } = await apiClient.from("payments").select("*, bookings(tracking_id)").in("booking_id", bIds).order("due_date", { ascending: true });
         payByBooking = pb || [];
       }
       const allPayments = [...(payByUser || [])];
@@ -135,9 +135,9 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
 
       // Documents & hotels by user_id (these are user-specific)
       const [docsRes, hotelRes, directExpRes] = await Promise.all([
-        supabase.from("booking_documents").select("*").eq("user_id", customer.user_id).order("created_at", { ascending: false }),
-        supabase.from("hotel_bookings").select("*, hotels(name, city, location), hotel_rooms(name, price_per_night)").eq("user_id", customer.user_id).order("created_at", { ascending: false }),
-        supabase.from("expenses").select("*").eq("customer_id", customer.user_id).order("date", { ascending: false }),
+        apiClient.from("booking_documents").select("*").eq("user_id", customer.user_id).order("created_at", { ascending: false }),
+        apiClient.from("hotel_bookings").select("*, hotels(name, city, location), hotel_rooms(name, price_per_night)").eq("user_id", customer.user_id).order("created_at", { ascending: false }),
+        apiClient.from("expenses").select("*").eq("customer_id", customer.user_id).order("date", { ascending: false }),
       ]);
 
       setDocuments(docsRes.data || []);
@@ -146,7 +146,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
       // Get booking-linked expenses too
       let bookingExpenses: any[] = [];
       if (bIds.length > 0) {
-        const { data: bExp } = await supabase.from("expenses").select("*").in("booking_id", bIds);
+        const { data: bExp } = await apiClient.from("expenses").select("*").in("booking_id", bIds);
         bookingExpenses = bExp || [];
       }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import {
   LayoutDashboard, Package, Users, CreditCard, Settings, LogOut, Plus, X, AlertTriangle, FileText, FolderOpen, Building2, Pencil,
@@ -32,9 +32,9 @@ const AdminPanel = () => {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await apiClient.auth.getSession();
       if (!session) { navigate("/auth"); return; }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin").maybeSingle();
+      const { data } = await apiClient.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin").maybeSingle();
       if (!data) { toast.error("Access denied"); navigate("/dashboard"); return; }
       setIsAdmin(true);
       setLoading(false);
@@ -49,11 +49,11 @@ const AdminPanel = () => {
 
   const fetchAll = async () => {
     const [bk, py, pk, ip, ht] = await Promise.all([
-      supabase.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
-      supabase.from("payments").select("*, bookings(tracking_id)").order("created_at", { ascending: false }),
-      supabase.from("packages").select("*").order("created_at", { ascending: false }),
-      supabase.from("installment_plans").select("*").order("created_at", { ascending: false }),
-      supabase.from("hotels").select("*").order("created_at", { ascending: false }),
+      apiClient.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
+      apiClient.from("payments").select("*, bookings(tracking_id)").order("created_at", { ascending: false }),
+      apiClient.from("packages").select("*").order("created_at", { ascending: false }),
+      apiClient.from("installment_plans").select("*").order("created_at", { ascending: false }),
+      apiClient.from("hotels").select("*").order("created_at", { ascending: false }),
     ]);
     setBookings(bk.data || []);
     setPayments(py.data || []);
@@ -64,7 +64,7 @@ const AdminPanel = () => {
 
   const handleCreatePackage = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("packages").insert({
+    const { error } = await apiClient.from("packages").insert({
       name: pkgForm.name,
       type: pkgForm.type,
       description: pkgForm.description,
@@ -81,7 +81,7 @@ const AdminPanel = () => {
 
   const handleCreatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("installment_plans").insert({
+    const { error } = await apiClient.from("installment_plans").insert({
       name: planForm.name,
       num_installments: parseInt(planForm.num_installments),
       description: planForm.description || null,
@@ -94,7 +94,7 @@ const AdminPanel = () => {
   };
 
   const markPaymentCompleted = async (paymentId: string) => {
-    const { error } = await supabase.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", paymentId);
+    const { error } = await apiClient.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", paymentId);
     if (error) { toast.error(error.message); return; }
     toast.success("Payment marked as completed");
     fetchAll();
@@ -129,7 +129,7 @@ const AdminPanel = () => {
             <img src={logo} alt="Logo" className="h-10 w-10 rounded-md object-cover" />
             <span className="font-heading text-lg font-bold text-primary">Admin Panel</span>
           </div>
-          <button onClick={async () => { await supabase.auth.signOut(); navigate("/"); }} className="text-muted-foreground hover:text-foreground">
+          <button onClick={async () => { await apiClient.auth.signOut(); navigate("/"); }} className="text-muted-foreground hover:text-foreground">
             <LogOut className="h-5 w-5" />
           </button>
         </div>

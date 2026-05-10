@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import AdminDashboardCharts from "@/components/AdminDashboardCharts";
 
 export default function AdminDashboardPage() {
@@ -21,19 +21,19 @@ export default function AdminDashboardPage() {
 
   const fetchData = async () => {
     const [bk, py, ex, ac, fs, mp, sp, cp, ml, sa, sc, scp, dcb] = await Promise.all([
-      supabase.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
-      supabase.from("payments").select("*, bookings(tracking_id)").order("created_at", { ascending: false }),
-      supabase.from("expenses").select("*").order("date", { ascending: false }),
-      supabase.from("accounts").select("*"),
-      supabase.from("financial_summary").select("*").limit(1).maybeSingle(),
-      supabase.from("moallem_payments").select("*, moallems(name)").order("created_at", { ascending: false }),
-      supabase.from("supplier_agent_payments").select("*, supplier_agents(agent_name)").order("created_at", { ascending: false }),
-      supabase.from("moallem_commission_payments").select("*, moallems(name)").order("created_at", { ascending: false }),
-      supabase.from("moallems").select("*"),
-      supabase.from("supplier_agents").select("*"),
-      supabase.from("supplier_contracts").select("*"),
-      supabase.from("supplier_contract_payments").select("*").order("created_at", { ascending: false }),
-      supabase.from("daily_cashbook").select("*").order("date", { ascending: false }),
+      apiClient.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
+      apiClient.from("payments").select("*, bookings(tracking_id)").order("created_at", { ascending: false }),
+      apiClient.from("expenses").select("*").order("date", { ascending: false }),
+      apiClient.from("accounts").select("*"),
+      apiClient.from("financial_summary").select("*").limit(1).maybeSingle(),
+      apiClient.from("moallem_payments").select("*, moallems(name)").order("created_at", { ascending: false }),
+      apiClient.from("supplier_agent_payments").select("*, supplier_agents(agent_name)").order("created_at", { ascending: false }),
+      apiClient.from("moallem_commission_payments").select("*, moallems(name)").order("created_at", { ascending: false }),
+      apiClient.from("moallems").select("*"),
+      apiClient.from("supplier_agents").select("*"),
+      apiClient.from("supplier_contracts").select("*"),
+      apiClient.from("supplier_contract_payments").select("*").order("created_at", { ascending: false }),
+      apiClient.from("daily_cashbook").select("*").order("date", { ascending: false }),
     ]);
     setBookings(bk.data || []);
     setPayments(py.data || []);
@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
   };
 
   const markPaymentCompleted = async (paymentId: string) => {
-    const { error } = await supabase.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", paymentId);
+    const { error } = await apiClient.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", paymentId);
     if (error) return;
     fetchData();
   };

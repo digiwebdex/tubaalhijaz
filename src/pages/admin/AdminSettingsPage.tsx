@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, X, Bell, PenTool, Database, LayoutGrid, FileText, Coins } from "lucide-react";
 import AdminDocumentViewer from "@/components/AdminDocumentViewer";
@@ -24,8 +24,8 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("installment_plans").select("*").order("created_at", { ascending: false }),
-      supabase.from("bookings").select("*").order("created_at", { ascending: false }),
+      apiClient.from("installment_plans").select("*").order("created_at", { ascending: false }),
+      apiClient.from("bookings").select("*").order("created_at", { ascending: false }),
     ]).then(([ip, bk]) => {
       setInstallmentPlans(ip.data || []);
       setBookings(bk.data || []);
@@ -34,14 +34,14 @@ export default function AdminSettingsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("installment_plans").insert({
+    const { error } = await apiClient.from("installment_plans").insert({
       name: form.name, num_installments: parseInt(form.num_installments), description: form.description || null,
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Plan created");
     setShowForm(false);
     setForm({ name: "", num_installments: "3", description: "" });
-    supabase.from("installment_plans").select("*").order("created_at", { ascending: false }).then(({ data }) => setInstallmentPlans(data || []));
+    apiClient.from("installment_plans").select("*").order("created_at", { ascending: false }).then(({ data }) => setInstallmentPlans(data || []));
   };
 
   return (

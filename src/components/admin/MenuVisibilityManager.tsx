@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Eye, EyeOff, Save, Menu } from "lucide-react";
 
@@ -27,7 +27,7 @@ export function useMenuVisibility() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    supabase
+    apiClient
       .from("company_settings")
       .select("*")
       .eq("setting_key", "menu_visibility")
@@ -50,7 +50,7 @@ export default function MenuVisibilityManager() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    supabase
+    apiClient
       .from("company_settings")
       .select("*")
       .eq("setting_key", "menu_visibility")
@@ -70,7 +70,7 @@ export default function MenuVisibilityManager() {
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: existing } = await supabase
+    const { data: existing } = await apiClient
       .from("company_settings")
       .select("id")
       .eq("setting_key", "menu_visibility")
@@ -78,12 +78,12 @@ export default function MenuVisibilityManager() {
 
     let error;
     if (existing?.id) {
-      ({ error } = await supabase
+      ({ error } = await apiClient
         .from("company_settings")
         .update({ setting_value: visibility })
         .eq("id", existing.id));
     } else {
-      ({ error } = await supabase
+      ({ error } = await apiClient
         .from("company_settings")
         .insert({ setting_key: "menu_visibility", setting_value: visibility }));
     }

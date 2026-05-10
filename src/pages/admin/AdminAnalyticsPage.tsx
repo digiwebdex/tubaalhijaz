@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCanSeeProfit } from "@/components/admin/AdminLayout";
@@ -28,12 +28,12 @@ export default function AdminAnalyticsPage() {
   useEffect(() => {
     const load = async () => {
       const [bk, pay, exp, pkg, ml, mlp] = await Promise.all([
-        supabase.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
-        supabase.from("payments").select("*").eq("status", "completed"),
-        supabase.from("expenses").select("*"),
-        supabase.from("packages").select("*"),
-        supabase.from("moallems").select("*"),
-        supabase.from("moallem_payments").select("*"),
+        apiClient.from("bookings").select("*, packages(name, type)").order("created_at", { ascending: false }),
+        apiClient.from("payments").select("*").eq("status", "completed"),
+        apiClient.from("expenses").select("*"),
+        apiClient.from("packages").select("*"),
+        apiClient.from("moallems").select("*"),
+        apiClient.from("moallem_payments").select("*"),
       ]);
       setBookings(bk.data || []);
       setPayments(pay.data || []);

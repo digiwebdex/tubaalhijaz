@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import defaultSignatureImg from "@/assets/default-signature.png";
 
 export interface SignatureData {
@@ -35,7 +35,7 @@ export async function getSignatureData(): Promise<SignatureData> {
     return cachedSignature;
   }
 
-  const { data } = await supabase
+  const { data } = await apiClient
     .from("company_settings")
     .select("setting_value")
     .eq("setting_key", "signature")

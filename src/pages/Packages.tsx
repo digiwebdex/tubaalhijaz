@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Filter } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -35,7 +35,7 @@ const Packages = () => {
 
   useEffect(() => {
     const fetchPackages = async () => {
-      const { data } = await supabase.from("packages").select("*").eq("is_active", true).eq("show_on_website", true).order("price", { ascending: true });
+      const { data } = await apiClient.from("packages").select("*").eq("is_active", true).eq("show_on_website", true).order("price", { ascending: true });
       setPackages(data || []);
       setLoading(false);
     };

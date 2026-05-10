@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Plus, X, Building2, Bed, Trash2, Edit2, Save, ChevronDown, ChevronUp, Image as ImageIcon, Star, MapPin, Eye } from "lucide-react";
 import HotelImageUpload from "@/components/admin/HotelImageUpload";
@@ -31,7 +31,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
   const [roomForm, setRoomForm] = useState(emptyRoomForm);
 
   const fetchRooms = async (hotelId: string) => {
-    const { data } = await supabase.from("hotel_rooms").select("*").eq("hotel_id", hotelId).order("price_per_night");
+    const { data } = await apiClient.from("hotel_rooms").select("*").eq("hotel_id", hotelId).order("price_per_night");
     setRooms((prev) => ({ ...prev, [hotelId]: data || [] }));
   };
 
@@ -45,7 +45,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
   const handleCreateHotel = async (e: React.FormEvent) => {
     e.preventDefault();
     const amenitiesArr = hotelForm.amenities.split(",").map((a) => a.trim()).filter(Boolean);
-    const { error } = await supabase.from("hotels").insert({
+    const { error } = await apiClient.from("hotels").insert({
       name: hotelForm.name, location: hotelForm.location, city: hotelForm.city,
       description: hotelForm.description || null, star_rating: parseInt(hotelForm.star_rating),
       distance_to_haram: hotelForm.distance_to_haram || null, image_url: hotelForm.image_url || null,
@@ -71,7 +71,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
 
   const saveEditHotel = async (hotelId: string) => {
     const amenitiesArr = hotelForm.amenities.split(",").map((a) => a.trim()).filter(Boolean);
-    const { error } = await supabase.from("hotels").update({
+    const { error } = await apiClient.from("hotels").update({
       name: hotelForm.name, location: hotelForm.location, city: hotelForm.city,
       description: hotelForm.description || null, star_rating: parseInt(hotelForm.star_rating),
       distance_to_haram: hotelForm.distance_to_haram || null, image_url: hotelForm.image_url || null,
@@ -87,7 +87,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
   const handleCreateRoom = async (e: React.FormEvent, hotelId: string) => {
     e.preventDefault();
     const amenitiesArr = roomForm.amenities.split(",").map((a) => a.trim()).filter(Boolean);
-    const { error } = await supabase.from("hotel_rooms").insert({
+    const { error } = await apiClient.from("hotel_rooms").insert({
       hotel_id: hotelId, name: roomForm.name, description: roomForm.description || null,
       capacity: parseInt(roomForm.capacity), price_per_night: parseFloat(roomForm.price_per_night),
       image_url: roomForm.image_url || null, amenities: amenitiesArr.length > 0 ? amenitiesArr : [],
@@ -110,7 +110,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
 
   const saveEditRoom = async (roomId: string, hotelId: string) => {
     const amenitiesArr = roomForm.amenities.split(",").map((a) => a.trim()).filter(Boolean);
-    const { error } = await supabase.from("hotel_rooms").update({
+    const { error } = await apiClient.from("hotel_rooms").update({
       name: roomForm.name, description: roomForm.description || null,
       capacity: parseInt(roomForm.capacity), price_per_night: parseFloat(roomForm.price_per_night),
       image_url: roomForm.image_url || null, amenities: amenitiesArr.length > 0 ? amenitiesArr : [],
@@ -123,14 +123,14 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
   };
 
   const toggleHotelActive = async (hotel: any) => {
-    const { error } = await supabase.from("hotels").update({ is_active: !hotel.is_active }).eq("id", hotel.id);
+    const { error } = await apiClient.from("hotels").update({ is_active: !hotel.is_active }).eq("id", hotel.id);
     if (error) { toast.error(error.message); return; }
     toast.success(hotel.is_active ? "Hotel deactivated" : "Hotel activated");
     onRefresh();
   };
 
   const toggleRoomAvailable = async (room: any, hotelId: string) => {
-    const { error } = await supabase.from("hotel_rooms").update({ is_available: !room.is_available }).eq("id", room.id);
+    const { error } = await apiClient.from("hotel_rooms").update({ is_available: !room.is_available }).eq("id", room.id);
     if (error) { toast.error(error.message); return; }
     toast.success(room.is_available ? "Room marked unavailable" : "Room marked available");
     fetchRooms(hotelId);
@@ -139,12 +139,12 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     if (deleteConfirm.type === "hotel") {
-      const { error } = await supabase.from("hotels").delete().eq("id", deleteConfirm.id);
+      const { error } = await apiClient.from("hotels").delete().eq("id", deleteConfirm.id);
       if (error) { toast.error(error.message); setDeleteConfirm(null); return; }
       toast.success("Hotel deleted");
       onRefresh();
     } else {
-      const { error } = await supabase.from("hotel_rooms").delete().eq("id", deleteConfirm.id);
+      const { error } = await apiClient.from("hotel_rooms").delete().eq("id", deleteConfirm.id);
       if (error) { toast.error(error.message); setDeleteConfirm(null); return; }
       toast.success("Room deleted");
       if (deleteConfirm.hotelId) fetchRooms(deleteConfirm.hotelId);
@@ -229,7 +229,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
                     <img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover" />
                   </div>
                 )}
-                <div className="flex-1 p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => { if (!isEditing) { setViewHotel(hotel); supabase.from("hotel_rooms").select("*").eq("hotel_id", hotel.id).order("price_per_night").then(({ data }) => setViewHotelRooms(data || [])); } }}>
+                <div className="flex-1 p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => { if (!isEditing) { setViewHotel(hotel); apiClient.from("hotel_rooms").select("*").eq("hotel_id", hotel.id).order("price_per_night").then(({ data }) => setViewHotelRooms(data || [])); } }}>
                   <div className="flex items-center gap-3">
                     {!hotel.image_url && <Building2 className="h-5 w-5 text-primary flex-shrink-0" />}
                     <div>
@@ -248,7 +248,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={(e) => { e.stopPropagation(); const openView = async () => { setViewHotel(hotel); const { data } = await supabase.from("hotel_rooms").select("*").eq("hotel_id", hotel.id).order("price_per_night"); setViewHotelRooms(data || []); }; openView(); }} className="text-xs text-muted-foreground hover:text-primary p-1">
+                    <button onClick={(e) => { e.stopPropagation(); const openView = async () => { setViewHotel(hotel); const { data } = await apiClient.from("hotel_rooms").select("*").eq("hotel_id", hotel.id).order("price_per_night"); setViewHotelRooms(data || []); }; openView(); }} className="text-xs text-muted-foreground hover:text-primary p-1">
                       <Eye className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); startEditHotel(hotel); }} className="text-xs text-muted-foreground hover:text-primary p-1">

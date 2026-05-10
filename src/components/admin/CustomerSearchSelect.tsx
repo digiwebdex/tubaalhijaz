@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Search, User, X, UserPlus } from "lucide-react";
 
 interface Customer {
@@ -41,7 +41,7 @@ export default function CustomerSearchSelect({ onSelect, selectedId }: Props) {
     setLoading(true);
     try {
       const term = `%${q.trim()}%`;
-      const { data } = await supabase
+      const { data } = await apiClient
         .from("profiles")
         .select("user_id, full_name, phone, email, passport_number, address")
         .ilike("full_name", term)

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { useIsViewer } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,10 +53,10 @@ export default function AdminSupplierAgentsPage() {
   const fetchData = async () => {
     setLoading(true);
     const [a, p, itemsRes, paymentsDetailRes] = await Promise.all([
-      supabase.from("supplier_agents").select("*").neq("status", "deleted").order("created_at", { ascending: false }),
-      supabase.from("supplier_agent_payments").select("id, supplier_agent_id, amount"),
-      supabase.from("supplier_agent_items").select("*").order("created_at", { ascending: true }),
-      supabase.from("supplier_agent_payments").select("*").order("date", { ascending: false }),
+      apiClient.from("supplier_agents").select("*").neq("status", "deleted").order("created_at", { ascending: false }),
+      apiClient.from("supplier_agent_payments").select("id, supplier_agent_id, amount"),
+      apiClient.from("supplier_agent_items").select("*").order("created_at", { ascending: true }),
+      apiClient.from("supplier_agent_payments").select("*").order("date", { ascending: false }),
     ]);
     if (a.data) setAgents(a.data as SupplierAgent[]);
     if (p.data) setPayments(p.data);
@@ -99,11 +99,11 @@ export default function AdminSupplierAgentsPage() {
       contracted_amount: form.contracted_amount ? Number(form.contracted_amount) : 0,
     };
     if (editId) {
-      const { error } = await supabase.from("supplier_agents").update(payload).eq("id", editId);
+      const { error } = await apiClient.from("supplier_agents").update(payload).eq("id", editId);
       if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Supplier agent updated successfully" });
     } else {
-      const { error } = await supabase.from("supplier_agents").insert(payload);
+      const { error } = await apiClient.from("supplier_agents").insert(payload);
       if (error) { toast({ title: "Creation failed", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Supplier agent created successfully" });
     }
@@ -117,7 +117,7 @@ export default function AdminSupplierAgentsPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const { error } = await supabase.from("supplier_agents").update({ status: "deleted" }).eq("id", deleteId);
+    const { error } = await apiClient.from("supplier_agents").update({ status: "deleted" }).eq("id", deleteId);
     if (error) { toast({ title: "Failed to delete", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Supplier agent deleted successfully" }); setDeleteId(null); fetchData();
   };

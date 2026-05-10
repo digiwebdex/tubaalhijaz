@@ -1,14 +1,8 @@
-// API Client - Replaces Supabase client
-// Drop-in replacement for all supabase.from() and supabase.auth calls
-
-import { createClient } from '@supabase/supabase-js';
+// Self-hosted API client for Tuba Al Hijaz
+// All calls go to the VPS backend at VITE_API_URL (default '/api').
+// No external SDK dependencies.
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-// Supabase client for auth (used when VPS backend is unavailable)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
-const supabaseClient = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 // Token management
 class TokenManager {
@@ -98,7 +92,7 @@ async function apiFetch(path: string, options: RequestInit & { skipRedirect?: bo
 }
 
 // =============================================
-// Auth API (replaces supabase.auth)
+// Auth API
 // =============================================
 export const auth = {
   async signInWithPassword({ email, password }: { email: string; password: string }) {
@@ -126,42 +120,17 @@ export const auth = {
         };
       }
 
-      if (resData?.error && (!supabaseClient || res.status < 500)) {
+      if (resData?.error) {
         return { data: null, error: { message: resData.error } };
       }
     } catch {
-      // Fall back to Supabase auth when the custom API is unavailable
-    }
-
-    if (supabaseClient) {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) return { data: null, error: { message: error.message } };
-
-      const { data: rolesData } = await supabaseClient
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user.id);
-
-      const roles = rolesData?.map((r: any) => r.role) || [];
-      const user = { id: data.user.id, email: data.user.email, roles, ...data.user.user_metadata };
-      TokenManager.setTokens(data.session.access_token, data.session.refresh_token);
-      TokenManager.setUser(user);
-      return { data: { user, session: data.session }, error: null };
+      // network error — fall through
     }
 
     return { data: null, error: { message: 'Login failed. Please try again.' } };
   },
 
   async signUp({ email, password, options }: { email: string; password: string; options?: { data?: any } }) {
-    if (supabaseClient) {
-      const { data, error } = await supabaseClient.auth.signUp({
-        email, password,
-        options: { data: options?.data },
-      });
-      if (error) return { data: null, error: { message: error.message } };
-      return { data: {}, error: null };
-    }
-
     const res = await apiFetch('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, full_name: options?.data?.full_name, phone: options?.data?.phone }),
@@ -174,8 +143,6 @@ export const auth = {
   async signOut() {
     if (hasCustomSession()) {
       try { await apiFetch('/auth/logout', { method: 'POST', skipRedirect: true }); } catch {}
-    } else if (supabaseClient) {
-      await supabaseClient.auth.signOut();
     }
     TokenManager.clear();
     return { error: null };
@@ -186,14 +153,6 @@ export const auth = {
     const user = TokenManager.getUser();
     if (token && user) {
       return { data: { session: { user: { id: user.id, email: user.email }, access_token: token } } };
-    }
-
-    if (supabaseClient) {
-      const { data } = await supabaseClient.auth.getSession();
-      if (data.session) {
-        return { data: { session: { user: { id: data.session.user.id, email: data.session.user.email }, access_token: data.session.access_token } } };
-      }
-      return { data: { session: null } };
     }
 
     return { data: { session: null } };
@@ -220,28 +179,10 @@ export const auth = {
       return { data: { user: { id: localUser.id, email: localUser.email, ...localUser } } };
     }
 
-    if (supabaseClient) {
-      const { data } = await supabaseClient.auth.getUser();
-      if (data.user) {
-        const localUser = TokenManager.getUser();
-        const roles = localUser?.roles || [];
-        return { data: { user: { id: data.user.id, email: data.user.email, ...data.user.user_metadata, roles } } };
-      }
-      return { data: { user: null } };
-    }
-
     return { data: { user: null } };
   },
 
   async resetPasswordForEmail(email: string, _options?: any) {
-    if (supabaseClient) {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) return { error: { message: error.message } };
-      return { error: null };
-    }
-
     const res = await apiFetch('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
@@ -252,12 +193,6 @@ export const auth = {
   },
 
   async updateUser({ password }: { password: string }) {
-    if (supabaseClient) {
-      const { error } = await supabaseClient.auth.updateUser({ password });
-      if (error) return { error: { message: error.message } };
-      return { data: {}, error: null };
-    }
-
     const res = await apiFetch('/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: new URLSearchParams(window.location.search).get('token'), password }),
@@ -282,17 +217,6 @@ export const auth = {
       return { data: { subscription: { unsubscribe: () => window.removeEventListener('storage', handler) } } };
     }
 
-    if (supabaseClient) {
-      const { data } = supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (session) {
-          callback(event, { user: { id: session.user.id, email: session.user.email }, access_token: session.access_token });
-        } else {
-          callback(event, null);
-        }
-      });
-      return { data: { subscription: { unsubscribe: () => data.subscription.unsubscribe() } } };
-    }
-
     // Fallback: localStorage-based
     const token = TokenManager.getAccessToken();
     const user = TokenManager.getUser();
@@ -311,19 +235,6 @@ export const auth = {
 
   async setSession(session: { access_token: string; refresh_token: string }) {
     TokenManager.clear();
-
-    if (supabaseClient) {
-      const { error } = await supabaseClient.auth.setSession({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-      });
-
-      if (error) {
-        return { error: { message: error.message } };
-      }
-
-      return { error: null };
-    }
 
     return { error: { message: 'Authentication client unavailable' } };
   },
@@ -371,7 +282,7 @@ const tableUrlMap: Record<string, string> = {
 };
 
 // =============================================
-// Query Builder (replaces supabase.from())
+// Query Builder
 // =============================================
 class QueryBuilder {
   private table: string;
@@ -519,23 +430,6 @@ class QueryBuilder {
           }
         } catch {}
         
-        // Fallback to Supabase client for public reads when VPS is unavailable
-        if (!vpsOk && supabaseClient) {
-          let query: any = supabaseClient.from(this.table).select(this.selectFields);
-          for (const f of this.filters) {
-            const eqMatch = f.match(/^([^_=]+)=(.+)$/);
-            if (eqMatch) {
-              query = query.eq(eqMatch[1], decodeURIComponent(eqMatch[2]));
-            }
-          }
-          if (this.orderByField) {
-            query = query.order(this.orderByField, { ascending: this.orderAsc });
-          }
-          if (this.limitVal) query = query.limit(this.limitVal);
-          if (this.singleRow) query = query.maybeSingle();
-          const result = await query;
-          return { data: result.data, error: result.error };
-        }
         
         if (!vpsOk) {
           return { data: null, error: { message: 'API unavailable' } };
@@ -608,7 +502,7 @@ class QueryBuilder {
 }
 
 // =============================================
-// Storage API (replaces supabase.storage)
+// Storage API
 // =============================================
 const storage = {
   from(bucket: string) {
@@ -685,127 +579,53 @@ const storage = {
 };
 
 // =============================================
-// Functions API (replaces supabase.functions)
+// Functions API — calls VPS backend only
 // =============================================
 const functions = {
   async invoke(name: string, options?: { body?: any }) {
-    // Edge functions that have VPS equivalents — try VPS first
-    const vpsRoutes = ['track-booking', 'verify-invoice', 'create-guest-booking', 'send-notification', 'send-reminder', 'booking-notifications', 'send-otp', 'upload-booking-document'];
-    const isVpsRoute = name.startsWith('auth/') || vpsRoutes.includes(name);
-    const allowEdgeFallback = name === 'send-otp';
-    let vpsErrorMessage: string | null = null;
+    const path = name.startsWith('auth/') ? `/${name}` : `/${name}`;
+    const isFormData = options?.body instanceof FormData;
+    const token = TokenManager.getAccessToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (!isFormData) headers['Content-Type'] = 'application/json';
 
-    if (isVpsRoute) {
-      try {
-        const path = `/${name}`;
-        const isFormData = options?.body instanceof FormData;
-        const token = TokenManager.getAccessToken();
-        const headers: Record<string, string> = {};
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        if (!isFormData) headers['Content-Type'] = 'application/json';
-
-        const res = await fetch(`${API_URL}${path}`, {
-          method: 'POST',
-          headers,
-          body: isFormData ? options.body : (options?.body ? JSON.stringify(options.body) : undefined),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Request failed' }));
-          vpsErrorMessage = err.error || 'Request failed';
-          // For business-logic errors (4xx), don't fallback — return VPS error directly
-          if (!allowEdgeFallback || (res.status >= 400 && res.status < 500)) {
-            return { data: null, error: { message: vpsErrorMessage } };
-          }
-        } else {
-          const data = await res.json().catch(() => ({}));
-          return { data, error: null };
-        }
-      } catch (err: any) {
-        vpsErrorMessage = err.message || 'VPS unreachable';
-        if (!allowEdgeFallback) {
-          return { data: null, error: { message: vpsErrorMessage } };
-        }
-      }
-    }
-
-    // Call Supabase Edge Function directly
-    const supabaseUrl = SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL || '';
-    const supabaseKey = SUPABASE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || '';
-
-    // Build the edge function URL
-    let edgeFnUrl = '';
-    if (supabaseUrl) {
-      edgeFnUrl = `${supabaseUrl}/functions/v1/${name}`;
-    } else if (projectId) {
-      edgeFnUrl = `https://${projectId}.supabase.co/functions/v1/${name}`;
-    }
-
-    if (edgeFnUrl) {
-      try {
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-        if (supabaseKey) {
-          headers['apikey'] = supabaseKey;
-          headers['Authorization'] = `Bearer ${supabaseKey}`;
-        }
-        const res = await fetch(edgeFnUrl, {
-          method: 'POST',
-          headers,
-          body: options?.body ? JSON.stringify(options.body) : undefined,
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Edge function error' }));
-          return { data: null, error: { message: err.error || vpsErrorMessage || 'Edge function error' } };
-        }
-        const data = await res.json();
-        return { data, error: null };
-      } catch (err: any) {
-        return { data: null, error: { message: err.message || vpsErrorMessage || 'Edge function error' } };
-      }
-    }
-
-    if (vpsErrorMessage) {
-      return { data: null, error: { message: vpsErrorMessage } };
-    }
-
-    // Last resort: try VPS /functions/ path for non-VPS routes
     try {
-      const res = await apiFetch(`/functions/${name}`, {
+      const res = await fetch(`${API_URL}${path}`, {
         method: 'POST',
-        body: options?.body ? JSON.stringify(options.body) : undefined,
+        headers,
+        body: isFormData ? options.body : (options?.body ? JSON.stringify(options.body) : undefined),
       });
-      const contentType = res.headers?.get?.('content-type') || '';
-      if (contentType.includes('application/json')) {
-        if (!res.ok) {
-          const err = await res.json();
-          return { data: null, error: { message: err.error } };
-        }
-        const data = await res.json();
-        return { data, error: null };
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Request failed' }));
+        return { data: null, error: { message: err.error || 'Request failed' } };
       }
-    } catch {}
-
-    return { data: null, error: { message: 'Function not available' } };
+      const data = await res.json().catch(() => ({}));
+      return { data, error: null };
+    } catch (err: any) {
+      return { data: null, error: { message: err.message || 'Backend unreachable' } };
+    }
   },
 };
 
 // =============================================
-// Main export (drop-in supabase replacement)
+// Main export — self-hosted backend client
 // =============================================
-export const supabase = {
+export const apiClient = {
   auth,
   storage,
   functions,
   from(table: string) {
     return new QueryBuilder(table);
   },
-  // Channel stub for realtime (not needed for VPS)
+  // Realtime stub (not used in production VPS build)
   channel(_name: string) {
     return {
       on: () => ({ subscribe: () => ({}) }),
       subscribe: () => ({}),
     };
   },
+  removeChannel(_ch: any) {},
 };
+
+export type ApiClient = typeof apiClient;

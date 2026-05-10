@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { generateInvoice, generateReceipt, CompanyInfo, InvoicePayment } from "@/lib/invoiceGenerator";
 import { Printer, Download, Search } from "lucide-react";
 import { generateVerificationId } from "@/lib/pdfQrCode";
@@ -35,14 +35,14 @@ export default function InvoicePage() {
     setError("");
     setBooking(null);
 
-    const { data: bk, error: bkErr } = await supabase
+    const { data: bk, error: bkErr } = await apiClient
       .from("bookings")
       .select("*")
       .eq("tracking_id", trackingId.trim().toUpperCase())
       .single();
 
     if (bk && bk.package_id) {
-      const { data: pkgData } = await supabase.from("packages").select("name, type, duration_days, start_date, price").eq("id", bk.package_id).maybeSingle();
+      const { data: pkgData } = await apiClient.from("packages").select("name, type, duration_days, start_date, price").eq("id", bk.package_id).maybeSingle();
       if (pkgData) (bk as any).packages = pkgData;
     }
 
@@ -53,10 +53,10 @@ export default function InvoicePage() {
     }
 
     const [payRes, profRes, sigRes, moallemRes] = await Promise.all([
-      supabase.from("payments").select("*").eq("booking_id", bk.id).order("installment_number"),
-      bk.user_id ? supabase.from("profiles").select("full_name, phone, passport_number, address, email").eq("user_id", bk.user_id).single() : Promise.resolve({ data: null }),
-      supabase.from("company_settings").select("setting_value").eq("setting_key", "signature").maybeSingle(),
-      bk.moallem_id ? supabase.from("moallems").select("name").eq("id", bk.moallem_id).single() : Promise.resolve({ data: null }),
+      apiClient.from("payments").select("*").eq("booking_id", bk.id).order("installment_number"),
+      bk.user_id ? apiClient.from("profiles").select("full_name, phone, passport_number, address, email").eq("user_id", bk.user_id).single() : Promise.resolve({ data: null }),
+      apiClient.from("company_settings").select("setting_value").eq("setting_key", "signature").maybeSingle(),
+      bk.moallem_id ? apiClient.from("moallems").select("name").eq("id", bk.moallem_id).single() : Promise.resolve({ data: null }),
     ]);
 
     setBooking(bk);
@@ -85,13 +85,13 @@ export default function InvoicePage() {
     if (!booking || !customer) return;
 
     const [membersRes] = await Promise.all([
-      supabase.from("booking_members").select("*").eq("booking_id", booking.id).order("created_at", { ascending: true }),
+      apiClient.from("booking_members").select("*").eq("booking_id", booking.id).order("created_at", { ascending: true }),
     ]);
 
     const invoiceBooking = { ...booking };
 
     if (!invoiceBooking.packages && invoiceBooking.package_id) {
-      const { data: pkgData } = await supabase.from("packages").select("name, type, duration_days, start_date, price").eq("id", invoiceBooking.package_id).maybeSingle();
+      const { data: pkgData } = await apiClient.from("packages").select("name, type, duration_days, start_date, price").eq("id", invoiceBooking.package_id).maybeSingle();
       if (pkgData) invoiceBooking.packages = pkgData;
     }
 
@@ -100,7 +100,7 @@ export default function InvoicePage() {
     const memberPkgIds = memberRows.filter((m: any) => m.package_id && !m.packages).map((m: any) => m.package_id);
     if (memberPkgIds.length > 0) {
       const uniqueIds = Array.from(new Set(memberPkgIds));
-      const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", uniqueIds);
+      const { data: pkgs } = await apiClient.from("packages").select("id, name").in("id", uniqueIds);
       const pkgMap: Record<string, string> = {};
       (pkgs || []).forEach((p: any) => { pkgMap[p.id] = p.name; });
       memberRows.forEach((m: any) => {

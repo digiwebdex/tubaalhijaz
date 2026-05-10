@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,9 +31,9 @@ export default function AdminVisaPage() {
   const [search, setSearch] = useState("");
 
   const load = async () => {
-    const { data } = await supabase.from("visa_applications").select("*").eq("status", "active").order("created_at", { ascending: false });
+    const { data } = await apiClient.from("visa_applications").select("*").eq("status", "active").order("created_at", { ascending: false });
     setItems(data || []);
-    const { data: v } = await supabase.from("supplier_agents").select("id, agent_name, company_name").eq("status", "active");
+    const { data: v } = await apiClient.from("supplier_agents").select("id, agent_name, company_name").eq("status", "active");
     setVendors(v || []);
   };
   useEffect(() => { load(); }, []);
@@ -46,11 +46,11 @@ export default function AdminVisaPage() {
     ["id", "invoice_no", "profit", "customer_due", "payment_status"].forEach(k => delete payload[k]);
 
     if (editing) {
-      const { error } = await supabase.from("visa_applications").update(payload).eq("id", editing.id);
+      const { error } = await apiClient.from("visa_applications").update(payload).eq("id", editing.id);
       if (error) return toast({ title: "Update failed", description: error.message, variant: "destructive" });
       toast({ title: "Visa application updated" });
     } else {
-      const { error } = await supabase.from("visa_applications").insert(payload);
+      const { error } = await apiClient.from("visa_applications").insert(payload);
       if (error) return toast({ title: "Create failed", description: error.message, variant: "destructive" });
       toast({ title: "Visa application created" });
     }
@@ -59,7 +59,7 @@ export default function AdminVisaPage() {
 
   const remove = async (id: string) => {
     if (!confirm("Delete?")) return;
-    await supabase.from("visa_applications").update({ status: "deleted" }).eq("id", id);
+    await apiClient.from("visa_applications").update({ status: "deleted" }).eq("id", id);
     load();
   };
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,7 +27,7 @@ export default function TripCompletionMessage({
   const sendEmailSms = async () => {
     setSending(true);
     try {
-      const { error } = await supabase.functions.invoke("send-notification", {
+      const { error } = await apiClient.functions.invoke("send-notification", {
         body: {
           type: "custom",
           channels: ["email", "sms"],

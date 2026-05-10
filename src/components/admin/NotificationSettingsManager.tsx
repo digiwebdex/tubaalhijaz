@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Bell, Mail, MessageSquare, Loader2, Plus, Pencil, Trash2, X, Check, Save, Eye, EyeOff, Settings2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -45,7 +45,7 @@ export default function NotificationSettingsManager() {
 
   const fetchSettings = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from("notification_settings" as any)
       .select("*")
       .order("event_key");
@@ -59,7 +59,7 @@ export default function NotificationSettingsManager() {
 
   const fetchApiConfig = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from("company_settings" as any)
         .select("*")
         .eq("setting_key", "notification_api_config");
@@ -87,13 +87,13 @@ export default function NotificationSettingsManager() {
     setSavingConfig(true);
     try {
       // Check if setting exists
-      const { data: existing } = await supabase
+      const { data: existing } = await apiClient
         .from("company_settings" as any)
         .select("id")
         .eq("setting_key", "notification_api_config");
 
       if (existing && existing.length > 0) {
-        const { error } = await supabase
+        const { error } = await apiClient
           .from("company_settings" as any)
           .update({
             setting_value: apiConfig as any,
@@ -102,7 +102,7 @@ export default function NotificationSettingsManager() {
           .eq("id", existing[0].id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await apiClient
           .from("company_settings" as any)
           .insert({
             setting_key: "notification_api_config",
@@ -119,7 +119,7 @@ export default function NotificationSettingsManager() {
 
   const handleToggle = async (id: string, field: "enabled" | "email_enabled" | "sms_enabled", value: boolean) => {
     setSaving(id + field);
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("notification_settings" as any)
       .update({ [field]: value, updated_at: new Date().toISOString() } as any)
       .eq("id", id);
@@ -140,7 +140,7 @@ export default function NotificationSettingsManager() {
       return;
     }
     setSaving("add");
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("notification_settings" as any)
       .insert({
         event_key: form.event_key.trim().toLowerCase().replace(/\s+/g, "_"),
@@ -166,7 +166,7 @@ export default function NotificationSettingsManager() {
       return;
     }
     setSaving("edit");
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("notification_settings" as any)
       .update({
         event_key: form.event_key.trim().toLowerCase().replace(/\s+/g, "_"),
@@ -188,7 +188,7 @@ export default function NotificationSettingsManager() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this trigger?")) return;
     setDeleting(id);
-    const { error } = await supabase
+    const { error } = await apiClient
       .from("notification_settings" as any)
       .delete()
       .eq("id", id);

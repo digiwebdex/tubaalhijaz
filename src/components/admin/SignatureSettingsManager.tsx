@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/api";
-import { supabase as supabaseClient } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Upload, Trash2, Save, Stamp, PenTool } from "lucide-react";
 
@@ -32,7 +31,7 @@ export default function SignatureSettingsManager() {
   }, []);
 
   const loadSettings = async () => {
-    const { data } = await supabase
+    const { data } = await apiClient
       .from("company_settings")
       .select("setting_value")
       .eq("setting_key", "signature")
@@ -55,7 +54,7 @@ export default function SignatureSettingsManager() {
     const ext = file.name.split(".").pop();
     const path = `${type}/${Date.now()}.${ext}`;
 
-    const { error } = await supabaseClient.storage
+    const { error } = await apiClient.storage
       .from("company-assets")
       .upload(path, file, { upsert: true });
 
@@ -65,7 +64,7 @@ export default function SignatureSettingsManager() {
       return;
     }
 
-    const { data: urlData } = supabaseClient.storage
+    const { data: urlData } = apiClient.storage
       .from("company-assets")
       .getPublicUrl(path);
 
@@ -90,11 +89,11 @@ export default function SignatureSettingsManager() {
   const saveSettings = async (data?: SignatureSettings) => {
     setSaving(true);
     const toSave = data || settings;
-    const { data: session } = await supabase.auth.getSession();
+    const { data: session } = await apiClient.auth.getSession();
     const userId = session?.session?.user?.id || null;
 
     // Try update first
-    const { data: updateResult, error: updateError } = await supabase
+    const { data: updateResult, error: updateError } = await apiClient
       .from("company_settings")
       .update({
         setting_value: toSave as any,
@@ -106,7 +105,7 @@ export default function SignatureSettingsManager() {
 
     // If no rows updated, insert
     if (!updateError && (!updateResult || (updateResult as any[]).length === 0)) {
-      const { error: insertError } = await supabase
+      const { error: insertError } = await apiClient
         .from("company_settings")
         .insert({
           setting_key: "signature",
