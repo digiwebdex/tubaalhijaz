@@ -89,7 +89,7 @@ const createCrudRoutes = (tableName, options = {}) => {
   const router = express.Router();
   // Use id DESC as safe default because some tables (site_content/company_settings/financial_summary/user_roles)
   // do not have created_at.
-  const { readAuth = true, writeAuth = true, adminOnly = false, selectFields = '*', orderBy = 'id DESC' } = options;
+  const { readAuth = true, writeAuth = true, adminOnly = false, selectFields = '*', orderBy = 'id DESC', afterCreate = null, afterUpdate = null } = options;
 
   // List
   router.get('/', readAuth ? authenticate : optionalAuth, async (req, res) => {
@@ -205,6 +205,7 @@ const createCrudRoutes = (tableName, options = {}) => {
         console.log(`INSERT into ${tableName}:`, { sql, values, keys });
         const result = await query(sql, values);
         results.push(result.rows[0]);
+        if (afterCreate) { try { await afterCreate(result.rows[0], req); } catch (e) { console.error(`afterCreate ${tableName}:`, e.message); } }
       }
 
       res.status(201).json(Array.isArray(req.body) ? results : results[0]);
@@ -235,6 +236,7 @@ const createCrudRoutes = (tableName, options = {}) => {
         values
       );
       if (!result.rows[0]) return res.status(404).json({ error: 'Not found' });
+      if (afterUpdate) { try { await afterUpdate(result.rows[0], req); } catch (e) { console.error(`afterUpdate ${tableName}:`, e.message); } }
       res.json(result.rows[0]);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -448,8 +450,16 @@ app.get('/api/bookings', authenticate, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-app.use('/api/bookings', createCrudRoutes('bookings', { adminOnly: true }));
-app.use('/api/payments', createCrudRoutes('payments', { adminOnly: true }));
+const triggers = require('./services/messagingTriggers');
+app.use('/api/bookings', createCrudRoutes('bookings', {
+  adminOnly: true,
+  afterCreate: triggers.onBookingCreated,
+  afterUpdate: triggers.onBookingUpdated,
+}));
+app.use('/api/payments', createCrudRoutes('payments', {
+  adminOnly: true,
+  afterCreate: triggers.onPaymentCreated,
+}));
 app.use('/api/expenses', createCrudRoutes('expenses', { adminOnly: true }));
 app.use('/api/transactions', createCrudRoutes('transactions', { adminOnly: true }));
 app.use('/api/profiles', createCrudRoutes('profiles', { adminOnly: true }));
