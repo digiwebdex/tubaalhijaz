@@ -639,6 +639,16 @@ export const apiClient = {
   from(table: string) {
     return new QueryBuilder(table);
   },
+  // Generic JSON request helper for non-table endpoints (notifications, messaging, etc.)
+  async request<T = any>(path: string, options: RequestInit = {}): Promise<T> {
+    const res = await apiFetch(path, options);
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Request failed: ${res.status}`);
+    }
+    if (res.status === 204) return undefined as T;
+    return res.json() as Promise<T>;
+  },
   // Realtime stub (not used in production VPS build)
   channel(_name: string) {
     return {
