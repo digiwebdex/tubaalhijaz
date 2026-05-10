@@ -133,7 +133,105 @@ const App = () => (
               <FacebookPixelProvider />
               <ErrorBoundary>
                 <Routes>
-// ... keep existing code (all <Route> declarations unchanged)
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/packages" element={<Packages />} />
+                  <Route path="/packages/:id" element={<PackageDetail />} />
+                  <Route path="/hotels" element={<Hotels />} />
+                  <Route path="/hotels/:id" element={<HotelDetail />} />
+                  <Route path="/booking" element={<Booking />} />
+                  <Route path="/track" element={<TrackBooking />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/invoice" element={<InvoicePage />} />
+                  <Route path="/verify/:invoiceNumber" element={<VerifyInvoice />} />
+                  <Route path="/verify/track/:trackingId" element={<VerifyInvoice />} />
+                  <Route path="/verify" element={<VerifyInvoice />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-conditions" element={<TermsConditions />} />
+                  <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/umrah-guide" element={<UmrahGuide />} />
+                  <Route path="/payment/:status" element={<PaymentStatus />} />
+
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminDashboardPage />} />
+                    <Route path="bookings" element={<AdminBookingsPage />} />
+                    <Route path="bookings/create" element={<AdminCreateBookingPage />} />
+                    <Route path="customers" element={<AdminCustomersPage />} />
+                    <Route path="packages" element={<AdminPackagesPage />} />
+                    <Route path="payments" element={<AdminPaymentsPage />} />
+                    <Route path="accounting" element={<AdminAccountingPage />} />
+                    <Route path="reports" element={<AdminReportsPage />} />
+                    <Route path="moallems" element={<AdminMoallemsPage />} />
+                    <Route path="moallems/:id" element={<AdminMoallemProfilePage />} />
+                    <Route path="supplier-agents" element={<AdminSupplierAgentsPage />} />
+                    <Route path="supplier-agents/:id" element={<AdminSupplierAgentProfilePage />} />
+                    <Route path="calculator" element={<AdminCalculatorPage />} />
+                    <Route path="hotels" element={<AdminHotelsPage />} />
+                    <Route path="notifications" element={<AdminNotificationsPage />} />
+                    <Route path="due-alerts" element={<AdminDueAlertsPage />} />
+                    <Route path="chart-of-accounts" element={<AdminChartOfAccountsPage />} />
+                    <Route path="receivables" element={<AdminReceivablesPage />} />
+                    <Route path="refunds" element={<AdminRefundsPage />} />
+                    <Route path="analytics" element={<AdminAnalyticsPage />} />
+                    <Route path="cms" element={<AdminCmsPage />} />
+                    <Route path="seo" element={<AdminSeoPage />} />
+                    <Route path="payment-methods" element={<AdminPaymentMethodsPage />} />
+                    <Route path="tickets" element={<AdminTicketsPage />} />
+                    <Route path="visa" element={<AdminVisaPage />} />
+                    <Route path="ticket-refunds" element={<AdminTicketRefundsPage />} />
+                    <Route path="settlements" element={<AdminSettlementsPage />} />
+                    <Route path="bulk-import" element={<AdminBulkImportPage />} />
+                    <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+                    <Route path="security" element={<AdminSecurityPage />} />
+                    <Route path="rbac" element={<AdminRolesPermissionsPage />} />
+                    <Route path="sessions" element={<AdminSessionsPage />} />
+                    <Route path="approvals" element={<AdminApprovalsPage />} />
+                    <Route path="guide" element={<AdminGuidePage />} />
+                    <Route path="settings" element={<AdminSettingsPage />} />
+                    <Route path="transport" element={<AdminTransportPage />} />
+                    <Route path="catering" element={<AdminCateringPage />} />
+                    <Route path="umrah-orders" element={<AdminUmrahOrdersPage />} />
+                    <Route path="transport-vouchers" element={<AdminTransportVouchersPage />} />
+                    <Route path="movements" element={<AdminInternalMovementsPage />} />
+                    <Route path="pilgrims" element={<AdminComingSoonPage title="Pilgrim Management" description="Centralized pilgrim profiles: passport, visa, photo, booking history, payment history, travel history." />} />
+                    <Route path="flights" element={<AdminComingSoonPage title="Flights" description="Arrival/departure flight schedule, airline coordination, airport transfer linking." />} />
+                    <Route path="drivers-vehicles" element={<AdminComingSoonPage title="Drivers & Vehicles" description="Bus & vehicle fleet, driver roster, capacity, availability tracking." />} />
+                    <Route path="agents" element={<AdminComingSoonPage title="Agents" description="Travel agents, commission tracking, due management, total bookings." />} />
+                    <Route path="invoices/:id" element={<AdminBilingualInvoicePage />} />
+                    <Route path="invoices" element={<AdminComingSoonPage title="Invoices" description="Open any booking and click the new Bilingual Invoice action to generate a SAR/BDT invoice with QR verification." />} />
+                    <Route path="message-templates" element={<AdminMessageTemplatesPage />} />
+                    <Route path="operations" element={<AdminOperationsCenterPage />} />
+                    <Route path="group-manifest" element={<AdminGroupManifestPage />} />
+                    <Route path="messaging-settings" element={<AdminMessagingSettingsPage />} />
+                    <Route path="message-logs" element={<AdminMessageLogsPage />} />
+                    <Route path="qr-verifications" element={<AdminQrVerificationsPage />} />
+                    <Route path="document-reviews" element={<AdminDocumentReviewsPage />} />
+                    <Route path="live-map" element={<AdminLiveOperationsMapPage />} />
+                    <Route path="airport-coordinator" element={<AdminAirportCoordinatorPage />} />
+                    <Route path="ops-alerts" element={<AdminOpsAlertsPage />} />
+                    <Route path="system-health" element={<AdminSystemHealthPage />} />
+                  </Route>
+
+                  <Route path="/agent" element={<AgentLayout />}>
+                    <Route index element={<AgentDashboardPage />} />
+                    <Route path="bookings" element={<AgentBookingsPage />} />
+                    <Route path="pilgrims" element={<AgentPilgrimsPage />} />
+                    <Route path="groups" element={<AgentGroupsPage />} />
+                    <Route path="commissions" element={<AgentCommissionsPage />} />
+                    <Route path="documents" element={<AgentDocumentsPage />} />
+                    <Route path="operations" element={<AgentOperationsPage />} />
+                  </Route>
+
+                  <Route path="/driver" element={<DriverLayout />}>
+                    <Route index element={<DriverTripsPage />} />
+                    <Route path="scan" element={<DriverScanPage />} />
+                    <Route path="alerts" element={<DriverAlertsPage />} />
+                    <Route path="profile" element={<DriverProfilePage />} />
+                  </Route>
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </ErrorBoundary>

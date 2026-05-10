@@ -3,7 +3,7 @@ import {
   Calculator, BarChart3, Pencil, Settings, LogOut, UserCheck, Truck,
   Hotel, Bell, AlertTriangle, BookOpen, DollarSign, RotateCcw, PieChart,
   Plane, FileCheck, Map, Search, Upload, Shield, ShieldCheck, Bus, UtensilsCrossed, ScrollText,
-  Receipt, Route as RouteIcon, Car, Briefcase, FileSignature,
+  Receipt, Route as RouteIcon, Car, Briefcase, FileSignature, Activity,
 } from "lucide-react";
 import logo from "@/assets/tuba-logo.png";
 import { NavLink } from "@/components/NavLink";
@@ -80,6 +80,7 @@ const systemMenu = [
   { title: "Active Sessions",      url: "/admin/sessions",              icon: UserCheck,       roles: ["admin"] },
   { title: "Audit Logs",           url: "/admin/audit-logs",            icon: Shield,          roles: ["admin"] },
   { title: "Security & 2FA",       url: "/admin/security",              icon: ShieldCheck,     roles: ["admin"] },
+  { title: "System Health",        url: "/admin/system-health",         icon: Activity,        roles: ["admin"] },
   { title: "User Guide",           url: "/admin/guide",                 icon: BookOpen,        roles: ["admin", "accountant", "cms_manager", "support"] },
   { title: "Settings",             url: "/admin/settings",              icon: Settings,        roles: ["admin"] },
 ];
