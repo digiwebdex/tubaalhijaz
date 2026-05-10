@@ -15,6 +15,8 @@ import { generateInvoice, generateReceipt, CompanyInfo, InvoicePayment } from "@
 import { useLanguage } from "@/i18n/LanguageContext";
 import { PayOnlineButton } from "@/components/PayOnlineButton";
 import DriverInfoCard from "@/components/DriverInfoCard";
+import BookingTimeline from "@/components/BookingTimeline";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface Booking {
   id: string;
@@ -60,6 +62,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [bookingDocs, setBookingDocs] = useState<Record<string, any[]>>({});
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
+  const [expandedTab, setExpandedTab] = useState<"timeline" | "documents">("timeline");
   const [expandedSchedule, setExpandedSchedule] = useState<string | null>(null);
 
   // Profile editing
@@ -356,9 +359,7 @@ const Dashboard = () => {
                             {overdueCount} {t("dashboard.overdue")}
                           </span>
                         )}
-                        <span className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${statusColor(b.status)}`}>
-                          {statusLabels[b.status] || b.status}
-                        </span>
+                        <StatusBadge kind={b.status as any} label={statusLabels[b.status]} size="sm" />
                       </div>
                     </div>
 
@@ -443,16 +444,44 @@ const Dashboard = () => {
                         />
                       )}
                       <button
-                        onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}
+                        onClick={() => { setExpandedBooking(expandedBooking === b.id ? null : b.id); setExpandedTab("timeline"); }}
                         className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
                       >
-                        <FileText className="h-4 w-4" />
-                        {t("dashboard.docs")} ({(bookingDocs[b.id] || []).length}/3)
+                        <History className="h-4 w-4" />
+                        {expandedBooking === b.id ? "Hide details" : "Timeline & docs"}
                       </button>
                     </div>
                     {expandedBooking === b.id && (
-                      <div className="px-5 pb-5 border-t border-border pt-3">
-                        <DocumentUpload bookingId={b.id} userId={user.id} documents={bookingDocs[b.id] || []} onUploaded={fetchData} />
+                      <div className="border-t border-border bg-muted/20">
+                        <div className="px-5 pt-3 flex items-center gap-1">
+                          {([
+                            { key: "timeline", label: "Timeline" },
+                            { key: "documents", label: `Documents (${(bookingDocs[b.id] || []).length}/3)` },
+                          ] as const).map((tab) => (
+                            <button
+                              key={tab.key}
+                              onClick={() => setExpandedTab(tab.key)}
+                              className={`px-3 py-1.5 rounded-t-md text-xs font-semibold transition-colors ${
+                                expandedTab === tab.key
+                                  ? "bg-card text-primary border border-border border-b-0"
+                                  : "text-muted-foreground hover:text-foreground"
+                              }`}
+                            >
+                              {tab.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="p-5 bg-card border-t border-border">
+                          {expandedTab === "timeline" ? (
+                            <BookingTimeline
+                              booking={b as any}
+                              payments={bPayments as any}
+                              documents={(bookingDocs[b.id] || []) as any}
+                            />
+                          ) : (
+                            <DocumentUpload bookingId={b.id} userId={user.id} documents={bookingDocs[b.id] || []} onUploaded={fetchData} />
+                          )}
+                        </div>
                       </div>
                     )}
                   </motion.div>
