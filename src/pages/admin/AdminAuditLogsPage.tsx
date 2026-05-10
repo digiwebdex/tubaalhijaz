@@ -89,6 +89,7 @@ export default function AdminAuditLogsPage() {
     return logs.filter((l) => {
       if (actionFilter !== "all" && l.action !== actionFilter) return false;
       if (entityFilter !== "all" && l.entity_type !== entityFilter) return false;
+      if (severityFilter !== "all" && (l.severity || "info") !== severityFilter) return false;
       if (!q) return true;
       return (
         l.actor_email?.toLowerCase().includes(q) ||
@@ -97,7 +98,7 @@ export default function AdminAuditLogsPage() {
         l.ip_address?.toLowerCase().includes(q)
       );
     });
-  }, [logs, search, actionFilter, entityFilter]);
+  }, [logs, search, actionFilter, entityFilter, severityFilter]);
 
   return (
     <div className="space-y-6 p-4 md:p-6">
