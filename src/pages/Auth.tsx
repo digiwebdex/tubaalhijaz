@@ -87,7 +87,7 @@ const Auth = () => {
       });
       if (error) throw error;
       toast.success(t("auth.accountCreated"));
-      setMode("login");
+      goAfterLogin("/dashboard");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
