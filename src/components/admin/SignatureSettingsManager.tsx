@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { apiClient } from "@/lib/apiClient";
-import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { Upload, Trash2, Save, Stamp, PenTool } from "lucide-react";
 

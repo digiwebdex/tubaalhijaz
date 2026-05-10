@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth as api, apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/apiClient";
+const api = apiClient.auth;
 import { toast } from "sonner";
 import logo from "@/assets/tuba-logo.png";
 import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle, Smartphone } from "lucide-react";
