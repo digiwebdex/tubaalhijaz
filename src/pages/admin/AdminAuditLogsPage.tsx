@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Shield, RefreshCw, Search, Eye } from "lucide-react";
+import { Shield, RefreshCw, Search, Eye, Download, AlertTriangle, AlertCircle, Info } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
