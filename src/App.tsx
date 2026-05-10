@@ -173,6 +173,9 @@ const App = () => (
               <Route path="bulk-import" element={<AdminBulkImportPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="security" element={<AdminSecurityPage />} />
+              <Route path="rbac" element={<AdminRolesPermissionsPage />} />
+              <Route path="sessions" element={<AdminSessionsPage />} />
+              <Route path="approvals" element={<AdminApprovalsPage />} />
               <Route path="guide" element={<AdminGuidePage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
               <Route path="transport" element={<AdminTransportPage />} />
