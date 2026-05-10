@@ -131,13 +131,34 @@ export const auth = {
   },
 
   async signUp({ email, password, options }: { email: string; password: string; options?: { data?: any } }) {
-    const res = await apiFetch('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, full_name: options?.data?.full_name, phone: options?.data?.phone }),
-    });
-    const resData = await res.json();
-    if (!res.ok) return { data: null, error: { message: resData.error } };
-    return { data: {}, error: null };
+    try {
+      const res = await fetch(`${API_URL}/auth/customer-register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: options?.data?.full_name,
+          phone: options?.data?.phone,
+        }),
+      });
+      const resData = await res.json().catch(() => null);
+      if (res.ok && resData) {
+        const user = { ...resData.user, roles: resData.roles || ['user'] };
+        TokenManager.setTokens(resData.access_token, resData.refresh_token);
+        TokenManager.setUser(user);
+        return {
+          data: {
+            user,
+            session: { user: { id: user.id, email: user.email }, access_token: resData.access_token },
+          },
+          error: null,
+        };
+      }
+      return { data: null, error: { message: resData?.error || 'Registration failed' } };
+    } catch {
+      return { data: null, error: { message: 'Registration failed. Please try again.' } };
+    }
   },
 
   async signOut() {

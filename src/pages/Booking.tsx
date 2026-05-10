@@ -116,6 +116,14 @@ const Booking = () => {
   });
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
 
+  // Pre-booking registration gate (for unauthenticated users)
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regShowPassword, setRegShowPassword] = useState(false);
+  const [registering, setRegistering] = useState(false);
+
   const [createdBooking, setCreatedBooking] = useState<{ id: string; tracking_id: string } | null>(null);
 
   const normalizePaymentMethods = (value: unknown) => {
@@ -252,6 +260,40 @@ const Booking = () => {
 
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
+  const handleRegisterAndContinue = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim()) { toast.error(t("auth.fullName") + " required"); return; }
+    if (!regEmail.trim()) { toast.error(t("auth.email") + " required"); return; }
+    if (regPassword.length < 8) {
+      toast.error(t("auth.passwordRules.length") || "Password must be at least 8 characters");
+      return;
+    }
+    setRegistering(true);
+    try {
+      const { data, error } = await apiClient.auth.signUp({
+        email: regEmail.trim(),
+        password: regPassword,
+        options: { data: { full_name: regName.trim(), phone: regPhone.trim() } },
+      });
+      if (error) throw new Error(error.message);
+
+      // Auto-login: signUp already stored tokens via TokenManager. Hydrate booking form.
+      const newUser = data?.user;
+      setUser(newUser);
+      setEmail(regEmail.trim());
+      setPersonalInfo((prev) => ({
+        ...prev,
+        fullName: regName.trim() || prev.fullName,
+        phone: regPhone.trim() || prev.phone,
+      }));
+      toast.success(t("auth.accountCreated") || "Account created! You're now logged in.");
+    } catch (err: any) {
+      toast.error(err.message || "Registration failed");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!pkg) return;
     setSubmitting(true);
@@ -333,7 +375,8 @@ const Booking = () => {
             </h1>
             {!user && (
               <p className="text-xs text-muted-foreground">
-                {t("booking.noAccountNeeded") || "অ্যাকাউন্ট ছাড়াই বুকিং করুন!"} <Link to="/auth" className="text-primary hover:underline">{t("nav.signIn")}</Link>
+                {t("auth.alreadyHaveAccount") || "Already have an account?"}{" "}
+                <Link to="/auth" className="text-primary hover:underline">{t("nav.signIn")}</Link>
               </p>
             )}
           </motion.div>
@@ -350,6 +393,66 @@ const Booking = () => {
               trackingId={createdBooking.tracking_id}
               userId={user?.id || ""}
             />
+          ) : !user ? (
+            <motion.form
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              onSubmit={handleRegisterAndContinue}
+              className="bg-card border border-border rounded-xl p-6 space-y-4"
+            >
+              <div className="text-center mb-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <h2 className="text-lg font-semibold">{t("auth.createAccount") || "Create your account"}</h2>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Please create an account to continue with your booking. You'll be logged in automatically.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">{t("auth.fullName") || "Full name"}</label>
+                <input type="text" required maxLength={100} value={regName}
+                  onChange={(e) => setRegName(e.target.value)} className={inputClass}
+                  placeholder={t("auth.enterFullName") || "Your full name"} />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">{t("auth.email") || "Email"}</label>
+                <input type="email" required maxLength={255} value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)} className={inputClass}
+                  placeholder="your@email.com" />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">{t("auth.phoneNumber") || "Phone"}</label>
+                <input type="tel" maxLength={15} value={regPhone}
+                  onChange={(e) => setRegPhone(e.target.value)} className={inputClass}
+                  placeholder="01XXXXXXXXX" />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">{t("auth.password") || "Password"}</label>
+                <div className="relative">
+                  <input type={regShowPassword ? "text" : "password"} required minLength={8}
+                    value={regPassword} onChange={(e) => setRegPassword(e.target.value)}
+                    className={`${inputClass} pr-20`}
+                    placeholder={t("auth.createStrongPw") || "Min 8 characters"} />
+                  <button type="button" onClick={() => setRegShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary hover:underline">
+                    {regShowPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Save your email and password — you'll use them to track your bookings.
+                </p>
+              </div>
+
+              <button type="submit" disabled={registering}
+                className="w-full bg-gradient-gold text-primary-foreground font-semibold py-3 rounded-md text-sm hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50">
+                {registering ? "Creating account..." : "Register & Continue to Booking"}
+              </button>
+            </motion.form>
           ) : (
             <>
               <BookingStepIndicator steps={STEPS} currentStep={step} />

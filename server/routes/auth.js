@@ -64,6 +64,60 @@ router.post('/register', (_req, res) => {
   return res.status(403).json({ error: 'Public registration is disabled. Contact your administrator.' });
 });
 
+// Public customer registration (role='user' ONLY — admin role permanently blocked)
+// Used by the booking flow to require a customer account before placing a booking.
+router.post('/customer-register', async (req, res) => {
+  try {
+    const { email, password, full_name, phone } = req.body || {};
+    if (!email || !password || !full_name) {
+      return res.status(400).json({ error: 'Email, password and full name are required' });
+    }
+    if (String(password).length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    // Block duplicate email (return friendly error)
+    const existing = await query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
+    if (existing.rows[0]) {
+      return res.status(409).json({ error: 'An account with this email already exists. Please sign in.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const userId = uuidv4();
+
+    await query(
+      'INSERT INTO users (id, email, password_hash, full_name, phone, email_verified) VALUES ($1, $2, $3, $4, $5, true)',
+      [userId, cleanEmail, passwordHash, full_name, phone || null]
+    );
+    await query(
+      'INSERT INTO profiles (user_id, full_name, email, phone) VALUES ($1, $2, $3, $4)',
+      [userId, full_name, cleanEmail, phone || null]
+    );
+    // SECURITY: hard-code 'user' role. Never accept role from request body.
+    await query('INSERT INTO user_roles (user_id, role) VALUES ($1, $2)', [userId, 'user']);
+
+    const user = { id: userId, email: cleanEmail, full_name };
+    const tokens = generateTokens(user);
+    await query(
+      'INSERT INTO sessions (user_id, refresh_token, expires_at) VALUES ($1, $2, now() + interval \'7 days\')',
+      [userId, tokens.refreshToken]
+    );
+
+    res.status(201).json({
+      user,
+      roles: ['user'],
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+    });
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'Email already exists' });
+    console.error('Customer register error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Refresh token
 router.post('/refresh', async (req, res) => {
   try {
