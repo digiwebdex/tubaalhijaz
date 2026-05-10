@@ -31,5 +31,9 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/integrations/supabase",
+    "src/integrations/supabase/**/*"
   ]
 }
