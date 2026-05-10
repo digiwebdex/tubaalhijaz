@@ -1480,3 +1480,72 @@ CREATE TABLE IF NOT EXISTS movement_schedules (
 );
 CREATE INDEX IF NOT EXISTS idx_movement_schedules_voucher ON movement_schedules(voucher_id);
 CREATE INDEX IF NOT EXISTS idx_movement_schedules_date ON movement_schedules(movement_date);
+
+-- =============================================================
+-- PHASE 6 SLICE D — MESSAGING ENGINE (notifications + queues + logs)
+-- =============================================================
+
+-- Generic in-app notification center
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID,                       -- target admin user (null = broadcast to all admins)
+  event_type TEXT NOT NULL,           -- booking_created, payment_received, visa_approved, ...
+  title TEXT NOT NULL,
+  body TEXT,
+  link TEXT,                          -- deep-link inside admin (e.g. /admin/bookings/<id>)
+  severity TEXT NOT NULL DEFAULT 'info', -- info | success | warning | error
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  read_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, read_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at DESC);
+
+-- Generic outbound message queue + log used for whatsapp / sms / email
+CREATE TABLE IF NOT EXISTS message_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  channel TEXT NOT NULL,              -- whatsapp | sms | email
+  language TEXT NOT NULL DEFAULT 'en',
+  recipient TEXT NOT NULL,            -- phone or email
+  recipient_name TEXT,
+  subject TEXT,                       -- email only
+  body TEXT NOT NULL,
+  event_key TEXT,                     -- ties back to message_templates
+  related_type TEXT,                  -- booking | payment | visa | invoice | manual
+  related_id UUID,
+  attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending | sending | sent | failed | cancelled
+  attempts INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 5,
+  next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_error TEXT,
+  provider_message_id TEXT,
+  created_by UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_message_queue_status_next ON message_queue(status, next_attempt_at);
+CREATE INDEX IF NOT EXISTS idx_message_queue_channel ON message_queue(channel);
+CREATE INDEX IF NOT EXISTS idx_message_queue_related ON message_queue(related_type, related_id);
+
+CREATE TABLE IF NOT EXISTS message_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  queue_id UUID,
+  channel TEXT NOT NULL,
+  recipient TEXT NOT NULL,
+  subject TEXT,
+  body TEXT,
+  event_key TEXT,
+  related_type TEXT,
+  related_id UUID,
+  status TEXT NOT NULL,               -- sent | failed
+  provider_message_id TEXT,
+  provider_response JSONB NOT NULL DEFAULT '{}'::jsonb,
+  error TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_message_logs_channel ON message_logs(channel);
+CREATE INDEX IF NOT EXISTS idx_message_logs_created ON message_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_message_logs_related ON message_logs(related_type, related_id);
+
