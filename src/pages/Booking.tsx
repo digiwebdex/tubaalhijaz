@@ -260,6 +260,40 @@ const Booking = () => {
 
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
+  const handleRegisterAndContinue = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim()) { toast.error(t("auth.fullName") + " required"); return; }
+    if (!regEmail.trim()) { toast.error(t("auth.email") + " required"); return; }
+    if (regPassword.length < 8) {
+      toast.error(t("auth.passwordRules.length") || "Password must be at least 8 characters");
+      return;
+    }
+    setRegistering(true);
+    try {
+      const { data, error } = await apiClient.auth.signUp({
+        email: regEmail.trim(),
+        password: regPassword,
+        options: { data: { full_name: regName.trim(), phone: regPhone.trim() } },
+      });
+      if (error) throw new Error(error.message);
+
+      // Auto-login: signUp already stored tokens via TokenManager. Hydrate booking form.
+      const newUser = data?.user;
+      setUser(newUser);
+      setEmail(regEmail.trim());
+      setPersonalInfo((prev) => ({
+        ...prev,
+        fullName: regName.trim() || prev.fullName,
+        phone: regPhone.trim() || prev.phone,
+      }));
+      toast.success(t("auth.accountCreated") || "Account created! You're now logged in.");
+    } catch (err: any) {
+      toast.error(err.message || "Registration failed");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!pkg) return;
     setSubmitting(true);
