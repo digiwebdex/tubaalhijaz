@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS supplier_agents (
 CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID,
-  package_id UUID NOT NULL REFERENCES packages(id),
+  package_id UUID REFERENCES packages(id),
   moallem_id UUID REFERENCES moallems(id),
   supplier_agent_id UUID REFERENCES supplier_agents(id),
   installment_plan_id UUID REFERENCES installment_plans(id),
