@@ -14,7 +14,8 @@
 | Frontend | React 18 + Vite + Tailwind + shadcn       |
 | Backend  | Node.js + Express (`/server/index.js`)    |
 | DB       | Self-hosted PostgreSQL (local socket/TCP) |
-| Process  | PM2 (`tubaalhijaz-api`, port `4002`)      |
+| Queue    | Redis 7 + BullMQ (`tubaalhijaz-worker`)   |
+| Process  | PM2 (`tubaalhijaz-api` + `tubaalhijaz-worker`, port `4002`) |
 | Web      | Nginx + Certbot Let's Encrypt SSL         |
 
 ### Dependency status (verified clean)
