@@ -1831,7 +1831,12 @@ app.use((err, req, res, _next) => {
 // =============================================
 // START
 // =============================================
-app.listen(PORT, () => {
-  console.log(`🚀 TRIP TASTIC API running on port ${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 TRIP TASTIC API running on ${HOST}:${PORT}`);
   console.log(`📁 Serving frontend from ${frontendPath}`);
+});
+
+server.on('error', (err) => {
+  console.error(`[startup] Failed to bind ${HOST}:${PORT}:`, err.message);
+  process.exit(1);
 });
