@@ -184,6 +184,16 @@ This produces `dist/` which Nginx will serve as static files.
 
 ## Step 9 — Backend deps & start with PM2
 
+> Two PM2 processes are started by `ecosystem.config.cjs`:
+> - `tubaalhijaz-api` — Express server (port `4002`)
+> - `tubaalhijaz-worker` — BullMQ consumer (SMS / WhatsApp / Email / PDF / GPS / messaging)
+>
+> The worker requires Redis. Confirm `redis-cli ping` returns `PONG` and
+> `REDIS_URL` is set in `server/.env` BEFORE running `pm2 start`. Without
+> `REDIS_URL` the worker process will exit immediately on boot and the API
+> will fall back to the legacy in-process polling loop (no duplicate sends —
+> only one of the two paths is ever active).
+
 ```bash
 cd /var/www/tubaalhijaz/server && bun install
 cd /var/www/tubaalhijaz
@@ -192,7 +202,16 @@ pm2 save
 pm2 startup systemd -u $USER --hp $HOME    # run the printed sudo command
 ```
 
-Verify: `curl -s http://127.0.0.1:4002/api/health` → JSON.
+Verify:
+
+```bash
+redis-cli ping                                       # PONG
+pm2 status                                           # api + worker = online
+curl -s http://127.0.0.1:4002/api/health             # JSON ok
+curl -s http://127.0.0.1:4002/api/health/ready       # db + storage + redis
+pm2 logs tubaalhijaz-worker --lines 50               # "worker_ready"
+```
+
 
 ## Step 10 — Nginx (HTTP first, for Certbot)
 
