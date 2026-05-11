@@ -1895,3 +1895,34 @@ CREATE TABLE IF NOT EXISTS public.failed_jobs (
 );
 CREATE INDEX IF NOT EXISTS idx_failed_jobs_queue ON public.failed_jobs (queue_name, failed_at DESC);
 CREATE INDEX IF NOT EXISTS idx_failed_jobs_unresolved ON public.failed_jobs (failed_at DESC) WHERE resolved_at IS NULL;
+
+-- =============================================
+-- Public Transport Voucher Booking Orders
+-- (submitted from the public Transport section)
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.transport_voucher_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_name TEXT,
+  agent_country TEXT,
+  umrah_company TEXT,
+  group_numbers JSONB DEFAULT '[]'::jsonb,
+  package_name TEXT,
+  travel_date DATE,
+  hotels JSONB DEFAULT '[]'::jsonb,
+  transport_type TEXT,
+  pilgrim_count INTEGER,
+  flights JSONB DEFAULT '[]'::jsonb,
+  internal_movements JSONB DEFAULT '[]'::jsonb,
+  supervisor_makkah_phone TEXT,
+  supervisor_madinah_phone TEXT,
+  ops_24h_phone TEXT,
+  contact_name TEXT NOT NULL,
+  contact_phone TEXT NOT NULL,
+  contact_email TEXT,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_transport_voucher_orders_created ON public.transport_voucher_orders (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_transport_voucher_orders_status ON public.transport_voucher_orders (status);
