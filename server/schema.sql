@@ -535,6 +535,10 @@ CREATE TABLE IF NOT EXISTS sessions (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   refresh_token TEXT NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
+  ip_address VARCHAR(255),
+  user_agent TEXT,
+  device_label TEXT,
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
