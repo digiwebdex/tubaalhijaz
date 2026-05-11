@@ -1,7 +1,11 @@
 // Phase 6 — Messaging Engine
-// Polls message_queue every N seconds and dispatches WhatsApp / SMS / Email
-// using provider configs stored in company_settings (key: 'messaging_config').
+// When REDIS_URL is set: rows inserted into message_queue are dispatched
+// via BullMQ (queue: 'messaging'); the legacy SQL polling loop is disabled
+// to prevent duplicate sends.
+// When REDIS_URL is not set: falls back to the legacy in-process polling
+// loop so dev / no-Redis deployments keep working unchanged.
 const { query } = require('../config/database');
+const { isQueueEnabled, enqueue: queueEnqueue, QUEUE_NAMES } = require('../queues');
 
 const POLL_INTERVAL_MS = Number(process.env.MESSAGE_POLL_MS || 8000);
 const BATCH_SIZE = Number(process.env.MESSAGE_BATCH_SIZE || 10);
