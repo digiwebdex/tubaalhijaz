@@ -5,10 +5,10 @@
 // Loads ALL workers in the queues/workers directory and shares a single
 // Redis connection. Logs structured JSON lines for ops visibility.
 // =====================================================================
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('./config/validateEnv')();
 
-const path = require('path');
 const fs = require('fs');
 const { Worker } = require('bullmq');
 const { getRedisConnection, isQueueEnabled } = require('./queues/connection');
