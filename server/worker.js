@@ -6,7 +6,11 @@
 // Redis connection. Logs structured JSON lines for ops visibility.
 // =====================================================================
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const envPath = path.resolve(__dirname, '.env');
+const envResult = require('dotenv').config({ path: envPath, override: true });
+if (envResult.error && envResult.error.code !== 'ENOENT') {
+  console.warn(`[env] Failed to load ${envPath}: ${envResult.error.message}`);
+}
 require('./config/validateEnv')();
 
 const fs = require('fs');
@@ -26,6 +30,15 @@ const workers = [];
 const log = (level, msg, meta = {}) => {
   process.stdout.write(JSON.stringify({ ts: new Date().toISOString(), level, msg, ...meta }) + '\n');
 };
+
+process.on('unhandledRejection', (err) => {
+  log('error', 'unhandled_rejection', { error: err?.message || String(err), stack: err?.stack });
+});
+
+process.on('uncaughtException', (err) => {
+  log('error', 'uncaught_exception', { error: err?.message || String(err), stack: err?.stack });
+  process.exit(1);
+});
 
 async function recordJobOutcome({ queueName, jobId, jobName, status, attempts, durationMs, payload, errorMessage, errorStack }) {
   try {
@@ -92,7 +105,16 @@ function loadWorkers() {
   }
 }
 
-loadWorkers();
+try {
+  loadWorkers();
+} catch (err) {
+  log('error', 'worker_startup_failed', { error: err.message, stack: err.stack });
+  process.exit(1);
+}
+
+if (!workers.length) {
+  log('warn', 'no_workers_loaded', { workersDir });
+}
 
 const shutdown = async (signal) => {
   log('info', 'shutting_down', { signal });
@@ -103,4 +125,4 @@ const shutdown = async (signal) => {
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
-log('info', 'worker_ready', { workers: workers.length });
+log('info', 'worker_ready', { workers: workers.length, env_file: envPath, env_file_loaded: !envResult.error, redis_url_configured: true });
